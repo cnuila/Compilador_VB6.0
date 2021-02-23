@@ -1,2 +1,18 @@
-Dim var1 As String = "Hello "
-Dim var2 As String = "World!"
+Module Module1
+ 
+    Sub Main()
+ 
+        Dim precio As Integer = 50
+ 
+        If precio > 100 Then
+            Console.WriteLine("El precio es mayor que 100")
+        Else
+            If precio > 80 Then
+                Console.WriteLine("El precio es mayor que 80")
+            Else
+                Console.WriteLine("El precio es menor que 80")
+            End If
+        End If
+    End Sub
+ 
+End Module

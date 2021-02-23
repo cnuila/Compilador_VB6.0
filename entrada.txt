@@ -8,7 +8,7 @@ Module Module1
  
     Sub Main()
  
-        Dim precio As Integer = 50
+        Dim precio As String = "Hello" & "World"
  
         If precio > 100 Then
             Console.WriteLine("El precio es mayor que 100")
@@ -19,6 +19,11 @@ Module Module1
                 Console.WriteLine("El precio es menor que 80")
             End If
         End If
+        Dim index As Integer = 0
+Do
+    Console.WriteLine(index & " ")
+    index += 1
+Loop Until index > 10
     End Sub
  
 End Module

@@ -52,13 +52,16 @@ PRIVATE = Private
 PUBLIC = Public
 STRUCTURE = Structure
 ENDSTRUCTURE = "End Structure"
-
+WHILE = While
+CONTINUEWHILE = "Continue While"
+EXITWHILE = "Exit While"
+ENDWHILE = "End While"
 %%
 
-<YYINITIAL> {    
+<YYINITIAL> {
     {inicioComentario}      {System.out.println("COMENTARIO");yybegin(COMENTARIO);}
     {READ}                  {System.out.println("READ CONSOLE");}
-    {WRITE}                 {System.out.println("WRITE IN CONSOLE");}  
+    {WRITE}                 {System.out.println("WRITE IN CONSOLE");}
     {DIM}                   {System.out.println("DIM");}
     {AS}                    {System.out.println("AS");}
     {BOOLEANTYPE}           {System.out.println("BOOLEANTYPE");}
@@ -80,6 +83,10 @@ ENDSTRUCTURE = "End Structure"
     {OR}                    {System.out.println("OR");}
     {NOT}                   {System.out.println("NOT");}
     {FOR}                   {System.out.println("FOR");}
+    {WHILE}                 {System.out.println("WHILE");}
+    {CONTINUEWHILE}         {System.out.println("CONTINUEWHILE");}
+    {EXITWHILE}             {System.out.println("EXITWHILE");}
+    {ENDWHILE}              {System.out.println("ENDWHILE");} 
     {TO}                    {System.out.println("TO");}
     {NEXT}                  {System.out.println("NEXT");}
     {STEP}                  {System.out.println("STEP");}

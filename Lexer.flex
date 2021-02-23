@@ -56,8 +56,9 @@ WHILE = While
 CONTINUEWHILE = "Continue While"
 EXITWHILE = "Exit While"
 ENDWHILE = "End While"
-%%
 
+
+%%
 <YYINITIAL> {
     {inicioComentario}      {System.out.println("COMENTARIO");yybegin(COMENTARIO);}
     {READ}                  {System.out.println("READ CONSOLE");}
@@ -83,15 +84,15 @@ ENDWHILE = "End While"
     {OR}                    {System.out.println("OR");}
     {NOT}                   {System.out.println("NOT");}
     {FOR}                   {System.out.println("FOR");}
-    {WHILE}                 {System.out.println("WHILE");}
-    {CONTINUEWHILE}         {System.out.println("CONTINUEWHILE");}
-    {EXITWHILE}             {System.out.println("EXITWHILE");}
-    {ENDWHILE}              {System.out.println("ENDWHILE");} 
     {TO}                    {System.out.println("TO");}
     {NEXT}                  {System.out.println("NEXT");}
     {STEP}                  {System.out.println("STEP");}
     {CONTINUEFOR}           {System.out.println("CONTINUEFOR");}
     {EXITFOR}               {System.out.println("EXITFOR");}
+    {WHILE}                 {System.out.println("WHILE");}
+    {CONTINUEWHILE}         {System.out.println("CONTINUEWHILE");}
+    {EXITWHILE}             {System.out.println("EXITWHILE");}
+    {ENDWHILE}              {System.out.println("ENDWHILE");} 
     {MODULE}                {System.out.println("MODULE");}
     {ENDMODULE}             {System.out.println("ENDMODULE");}
     {SUB}                   {System.out.println("SUB");}

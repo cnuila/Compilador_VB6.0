@@ -1,18 +1,7 @@
-Module Module1
- 
-    Sub Main()
- 
-        Dim precio As Integer = 50
- 
-        If precio > 100 Then
-            Console.WriteLine("El precio es mayor que 100")
-        Else
-            If precio > 80 Then
-                Console.WriteLine("El precio es mayor que 80")
-            Else
-                Console.WriteLine("El precio es menor que 80")
-            End If
-        End If
-    End Sub
- 
-End Module
+For c1 As Integer = 1 To 5 Step 2
+    statements
+    Continue For
+    statements
+    Exit For
+    statements
+Next c1

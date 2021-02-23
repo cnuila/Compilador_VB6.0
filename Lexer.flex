@@ -42,9 +42,21 @@ PARENTESISR = ")"
 EXTSTRING = " &_"{saltoLinea}
 READ = Console"."ReadLine
 WRITE = Console"."WriteLine
-
+FOR = For
+TO = To 
+NEXT = Next 
+STEP = Step 
+CONTINUEFOR = "Continue For"
+EXITFOR = "Exit For"
 %%
+
 <YYINITIAL> {
+    {FOR}                   {System.out.println("FOR");}
+    {TO}                    {System.out.println("TO");}
+    {NEXT}                  {System.out.println("NEXT");}
+    {STEP}                  {System.out.println("STEP");}
+    {CONTINUEFOR}           {System.out.println("CONTINUEFOR");}
+    {EXITFOR}               {System.out.println("EXITFOR");}
     {inicioComentario}      {System.out.println("COMENTARIO");yybegin(COMENTARIO);}
     {READ}                  {System.out.println("READ CONSOLE");}
     {WRITE}                 {System.out.println("WRITE IN CONSOLE");}  

@@ -48,15 +48,14 @@ NEXT = Next
 STEP = Step 
 CONTINUEFOR = "Continue For"
 EXITFOR = "Exit For"
+PRIVATE = Private
+PUBLIC = Public
+STRUCTURE = Structure
+ENDSTRUCTURE = "End Structure"
+
 %%
 
-<YYINITIAL> {
-    {FOR}                   {System.out.println("FOR");}
-    {TO}                    {System.out.println("TO");}
-    {NEXT}                  {System.out.println("NEXT");}
-    {STEP}                  {System.out.println("STEP");}
-    {CONTINUEFOR}           {System.out.println("CONTINUEFOR");}
-    {EXITFOR}               {System.out.println("EXITFOR");}
+<YYINITIAL> {    
     {inicioComentario}      {System.out.println("COMENTARIO");yybegin(COMENTARIO);}
     {READ}                  {System.out.println("READ CONSOLE");}
     {WRITE}                 {System.out.println("WRITE IN CONSOLE");}  
@@ -80,10 +79,20 @@ EXITFOR = "Exit For"
     {AND}                   {System.out.println("AND");}
     {OR}                    {System.out.println("OR");}
     {NOT}                   {System.out.println("NOT");}
+    {FOR}                   {System.out.println("FOR");}
+    {TO}                    {System.out.println("TO");}
+    {NEXT}                  {System.out.println("NEXT");}
+    {STEP}                  {System.out.println("STEP");}
+    {CONTINUEFOR}           {System.out.println("CONTINUEFOR");}
+    {EXITFOR}               {System.out.println("EXITFOR");}
     {MODULE}                {System.out.println("MODULE");}
     {ENDMODULE}             {System.out.println("ENDMODULE");}
     {SUB}                   {System.out.println("SUB");}
     {ENDSUB}                {System.out.println("ENDSUB");}
+    {STRUCTURE}             {System.out.println("STRUCTURE");}
+    {ENDSTRUCTURE}          {System.out.println("END STRUCTURE");}
+    {PUBLIC}                {System.out.println("PUBLIC");}
+    {PRIVATE}               {System.out.println("PRIVATE");}
     {PARENTESISL}           {System.out.println("INICIO PARENTESIS");}
     {PARENTESISR}           {System.out.println("FIN PARENTESIS");}     
     {identificador}         {System.out.println("IDENTIFICADOR");}     

@@ -9,4 +9,4 @@
                 Console.WriteLine("El precio es menor que 80")
             End             If
         End                                       If
-        Dim index As Integer = 0
+        Dim index As Integer + 0  iF 

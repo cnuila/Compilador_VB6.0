@@ -8,52 +8,53 @@ import java_cup.runtime.Symbol;
 %unicode
 %state STRING
 %state COMENTARIO
+%ignorecase
 
 saltoLinea = \n|\r|\n\r
 espacio = (" ")+
 letra = [a-zA-Z]
 digito = [0-9]
 identificador = {letra}({letra}|{digito}|_)*|_{letra}({letra}|{digito}|_)*
-DIM = (D|d)(I|i)(M|m)
-AS = (A|a)(S|s)
-BOOLEANTYPE = (B|b)(O|o)(O|o)(L|l)(E|e)(A|a)(N|n)
-TRUE = (T|t)(R|r)(U|u)(E|e)
-FALSE = (F|f)(A|a)(L|l)(S|s)(E|e)
-INTEGERTYPE = (I|i)(N|n)(T|t)(E|e)(G|g)(E|e)(R|r)
+DIM = dim
+AS = as
+BOOLEANTYPE = boolean
+TRUE = true
+FALSE = false
+INTEGERTYPE = integer
 INTEGER = {digito}+
-STRINGTYPE = (S|s)(T|t)(R|r)(I|i)(N|n)(G|g)
+STRINGTYPE = string
 delimitadorString = \"
 OPREL = <>|<|>|<=|>=|=
 OPADICION = "+"|-
 OPMULTI = "*"|"/"
-END = (E|e)(N|n)(D|d)
-IF = (I|i)(F|f)
-ELSE = (E|e)(L|l)(S|s)(E|e)
-ELSEIF = (E|e)(L|l)(S|s)(E|e)(I|i)(F|f)
-THEN = (T|t)(H|h)(E|e)(N|n)
-AND = (A|a)(N|n)(D|d)
-OR = (O|o)(R|r)
-NOT = (N|n)(O|o)(T|t)
-MODULE = (M|m)(O|o)(D|d)(U|u)(L|l)(E|e)
-SUB = (S|s)(U|u)(B|b)
+END = end
+IF = if
+ELSE = else
+ELSEIF = elseif
+THEN = then
+AND = and
+OR = or
+NOT = not
+MODULE = module
+SUB = sub
 inicioComentario = '
 PARENTESISL = "("
 PARENTESISR = ")"
 EXTSTRING = " &_"{saltoLinea}
-READ = Console"."ReadLine
-WRITE = Console"."WriteLine
-CONTINUE = (C|c)(O|o)(N|n)(T|t)(I|i)(N|n)(U|u)(E|e)
-EXIT = (E|e)(X|x)(I|i)(T|t)
-FOR = (F|f)(O|o)(R|r)
-TO = (T|t)(O|o) 
-NEXT = (N|n)(E|e)(X|x)(T|t) 
-STEP = (S|s)(T|t)(E|e)(P|p)
-STRUCTURE = (S|s)(T|t)(R|r)(U|u)(C|c)(T|t)(U|u)(R|r)(E|e)
-WHILE = (W|w)(H|h)(I|i)(L|l)(E|e)
-DO = (D|d)(O|o)
-UNTIL = (U|u)(N|n)(T|t)(I|i)(L|l)
-LOOP = (L|l)(O|o)(O|o)(P|p)
-RETURN = (R|r)(E|e)(T|t)(U|u)(R|r)(N|n)
+READ = console"."readline
+WRITE = console"."writeline
+CONTINUE = continue
+EXIT = exit
+FOR = for
+TO = to
+NEXT = next
+STEP = step
+STRUCTURE = structure
+WHILE = while
+DO = do
+UNTIL = until
+LOOP = loop
+RETURN = return
 CONCATSTRING = &
 
 %%

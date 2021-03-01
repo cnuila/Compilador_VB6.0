@@ -103,7 +103,7 @@ CONCATSTRING = &
     {identificador}         {System.out.println(yytext());}     
     {saltoLinea}            {System.out.println("ENTER");}
     {espacio}               {}
-    .                       {System.out.println("Token no reconocido en: " + yyline + " " + yycolumn);}    
+    .                       {System.out.println("Error léxico en: " + yyline + " " + yycolumn);}    
 }
 
 <STRING> {

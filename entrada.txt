@@ -5,7 +5,7 @@
         Else
             If precio > 80 Then
                 Console.WriteLine("El precio es mayor que 80")
-            Else
+                Else
                 Console.WriteLine("El precio es menor que 80")
             End             If
         End                                       IF

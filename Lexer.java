@@ -813,7 +813,7 @@ class Lexer {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { System.out.println("Token no reconocido en: " + yyline + " " + yycolumn);
+            { System.out.println("Error léxico en: " + yyline + " " + yycolumn);
             }
             // fall through
           case 49: break;

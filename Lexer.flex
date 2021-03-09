@@ -1,6 +1,7 @@
 import java_cup.runtime.Symbol;
 %%
 
+%cup
 %class Lexer
 %int
 %column
@@ -9,6 +10,10 @@ import java_cup.runtime.Symbol;
 %state STRING
 %state COMENTARIO
 %ignorecase
+
+%{
+    String cadena = "";
+%}
 
 saltoLinea = \n|\r|\n\r
 espacio = (" ")+
@@ -59,56 +64,56 @@ CONCATSTRING = &
 
 %%
 <YYINITIAL> {
-    {inicioComentario}      {System.out.println("COMENTARIO");yybegin(COMENTARIO);}
+    {inicioComentario}      {yybegin(COMENTARIO);}
     {READ}                  {System.out.println("READ CONSOLE");}
     {WRITE}                 {System.out.println("WRITE IN CONSOLE");}
-    {DIM}                   {System.out.println("DIM");}
-    {AS}                    {System.out.println("AS");}
-    {BOOLEANTYPE}           {System.out.println("BOOLEANTYPE");}
-    {TRUE}                  {System.out.println("TRUE");}
-    {FALSE}                 {System.out.println("FALSE");}
-    {INTEGERTYPE}           {System.out.println("INTEGERTYPE");}
-    {INTEGER}               {System.out.println("INTEGER");}
-    {STRINGTYPE}            {System.out.println("STRINGTYPE");}
-    {delimitadorString}     {System.out.println("STRING");yybegin(STRING);}  
-    {EXTSTRING}             {System.out.println("EXTENDER STRING");} 
-    {CONCATSTRING}          {System.out.println("CONCAT STRING");}
-    {OPREL}                 {System.out.println("OP REL");}
-    {OPADICION}             {System.out.println("OP ADICION");}    
-    {OPMULTI}               {System.out.println("OP MULTIPLICACION");}    
-    {END}                   {System.out.println("END");}
-    {EXIT}                  {System.out.println("EXIT");}
-    {CONTINUE}              {System.out.println("CONTINUE");}
-    {ELSEIF}                {System.out.println("ELSE IF");}
-    {IF}                    {System.out.println("IF");}
-    {ELSE}                  {System.out.println("ELSE");}
-    {THEN}                  {System.out.println("THEN");}    
-    {AND}                   {System.out.println("AND");}
-    {OR}                    {System.out.println("OR");}
-    {NOT}                   {System.out.println("NOT");}
-    {FOR}                   {System.out.println("FOR");}
-    {TO}                    {System.out.println("TO");}
-    {NEXT}                  {System.out.println("NEXT");}
-    {STEP}                  {System.out.println("STEP");}
-    {WHILE}                 {System.out.println("WHILE");}
-    {DO}                    {System.out.println("DO");}
-    {UNTIL}                 {System.out.println("UNTIL");}
-    {LOOP}                  {System.out.println("LOOP");}
-    {RETURN}                {System.out.println("RETURN");}
-    {MODULE}                {System.out.println("MODULE");}
-    {SUB}                   {System.out.println("SUB");}
-    {STRUCTURE}             {System.out.println("STRUCTURE");}
-    {PARENTESISL}           {System.out.println("INICIO PARENTESIS");}
-    {PARENTESISR}           {System.out.println("FIN PARENTESIS");}     
-    {identificador}         {System.out.println(yytext());}     
-    {saltoLinea}            {System.out.println("ENTER");}
+    {DIM}                   {return new Symbol(sym.DIM,yyline,yycolumn,yytext());}
+    {AS}                    {return new Symbol(sym.AS,yyline,yycolumn,yytext());}
+    {BOOLEANTYPE}           {return new Symbol(sym.BOOLEANTYPE,yyline,yycolumn,yytext());}
+    {TRUE}                  {return new Symbol(sym.TRUE,yyline,yycolumn,yytext());}
+    {FALSE}                 {return new Symbol(sym.FALSE,yyline,yycolumn,yytext());}
+    {INTEGERTYPE}           {return new Symbol(sym.INTEGERTYPE,yyline,yycolumn,yytext());}
+    {INTEGER}               {return new Symbol(sym.INTEGER,yyline,yycolumn,yytext());}
+    {STRINGTYPE}            {return new Symbol(sym.STRINGTYPE,yyline,yycolumn,yytext());}
+    {delimitadorString}     {cadena+="\"";yybegin(STRING);}  
+    {EXTSTRING}             {return new Symbol(sym.EXTSTRING,yyline,yycolumn,yytext());} 
+    {CONCATSTRING}          {return new Symbol(sym.CONCATSTRING,yyline,yycolumn,yytext());}
+    {OPREL}                 {return new Symbol(sym.OPREL,yyline,yycolumn,yytext());}
+    {OPADICION}             {return new Symbol(sym.OPADICION,yyline,yycolumn,yytext());}    
+    {OPMULTI}               {return new Symbol(sym.OPMULTI,yyline,yycolumn,yytext());}    
+    {END}                   {return new Symbol(sym.END,yyline,yycolumn,yytext());}
+    {EXIT}                  {return new Symbol(sym.EXIT,yyline,yycolumn,yytext());}
+    {CONTINUE}              {return new Symbol(sym.CONTINUE,yyline,yycolumn,yytext());}
+    {ELSEIF}                {return new Symbol(sym.ELSEIF,yyline,yycolumn,yytext());}
+    {IF}                    {return new Symbol(sym.IF,yyline,yycolumn,yytext());}
+    {ELSE}                  {return new Symbol(sym.ELSE,yyline,yycolumn,yytext());}
+    {THEN}                  {return new Symbol(sym.THEN,yyline,yycolumn,yytext());}    
+    {AND}                   {return new Symbol(sym.AND,yyline,yycolumn,yytext());}
+    {OR}                    {return new Symbol(sym.OR,yyline,yycolumn,yytext());}
+    {NOT}                   {return new Symbol(sym.NOT,yyline,yycolumn,yytext());}
+    {FOR}                   {return new Symbol(sym.FOR,yyline,yycolumn,yytext());}
+    {TO}                    {return new Symbol(sym.TO,yyline,yycolumn,yytext());}
+    {NEXT}                  {return new Symbol(sym.NEXT,yyline,yycolumn,yytext());}
+    {STEP}                  {return new Symbol(sym.STEP,yyline,yycolumn,yytext());}
+    {WHILE}                 {return new Symbol(sym.WHILE,yyline,yycolumn,yytext());}
+    {DO}                    {return new Symbol(sym.DO,yyline,yycolumn,yytext());}
+    {UNTIL}                 {return new Symbol(sym.UNTIL,yyline,yycolumn,yytext());}
+    {LOOP}                  {return new Symbol(sym.LOOP,yyline,yycolumn,yytext());}
+    {RETURN}                {return new Symbol(sym.RETURN,yyline,yycolumn,yytext());}
+    {MODULE}                {return new Symbol(sym.MODULE,yyline,yycolumn,yytext());}
+    {SUB}                   {return new Symbol(sym.SUB,yyline,yycolumn,yytext());}
+    {STRUCTURE}             {return new Symbol(sym.STRUCTURE,yyline,yycolumn,yytext());}
+    {PARENTESISL}           {return new Symbol(sym.PARENTESISL,yyline,yycolumn,yytext());}
+    {PARENTESISR}           {return new Symbol(sym.PARENTESISR,yyline,yycolumn,yytext());}     
+    {identificador}         {return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
+    {saltoLinea}            {return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
     {espacio}               {}
     .                       {System.out.println("Error léxico en: " + yyline + " " + yycolumn);}    
 }
 
 <STRING> {
-    {delimitadorString}     {System.out.println();yybegin(YYINITIAL);}
-    .                       {System.out.print(yytext());}    
+    {delimitadorString}     {String temp = cadena + "\""; cadena="";yybegin(YYINITIAL);return new Symbol(sym.STRING,yyline,yycolumn,temp);}
+    .                       {cadena+=yytext();}    
 }
 
 <COMENTARIO> {

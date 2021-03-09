@@ -1,0 +1,32 @@
+import java_cup.runtime.Symbol;
+
+parser code
+{:
+    public void syntax_error(Symbol s){
+        System.out.println("Syntax error");
+    }
+
+    //public void unrecovered_syntax_error
+:}
+
+action code
+{:
+    String tmp = "";
+:}
+
+terminal IF, ELSE, END, THEN, identificador, saltoLinea, DIM,ELSEIF, AS, BOOLEANTYPE, TRUE,FALSE,INTEGERTYPE,INTEGER,STRINGTYPE,OPREL,OPADICION,OPMULTI,AND,OR,NOT,MODULE,SUB,PARENTESISL,PARENTESISR,EXTSTRING,CONTINUE,EXIT,FOR,TO,NEXT,STEP,STRUCTURE,WHILE,DO,UNTIL,LOOP,RETURN,CONCATSTRING,STRING;
+
+nonterminal S;
+
+start with S;
+
+S ::= IF identificador saltoLinea ELSE END IF
+                                            {:
+                                                System.out.println("Se hizo bien");
+                                            :}
+;
+
+S ::= DIM  AS BOOLEANTYPE TRUE FALSE INTEGERTYPE INTEGER STRINGTYPE OPREL ELSEIF OPADICION OPMULTI AND OR NOT MODULE SUB PARENTESISL PARENTESISR EXTSTRING CONTINUE EXIT FOR TO NEXT STEP STRUCTURE WHILE DO UNTIL LOOP RETURN CONCATSTRING STRING;
+
+
+

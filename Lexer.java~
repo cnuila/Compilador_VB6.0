@@ -6,7 +6,7 @@ import java_cup.runtime.Symbol;
 
 // See https://github.com/jflex-de/jflex/issues/222
 @SuppressWarnings("FallThrough")
-class Lexer {
+class Lexer implements java_cup.runtime.Scanner {
 
   /** This character denotes the end of file. */
   public static final int YYEOF = -1;
@@ -416,8 +416,10 @@ class Lexer {
   private boolean zzAtBOL = true;
 
   /** Whether the user-EOF-code has already been executed. */
-  @SuppressWarnings("unused")
   private boolean zzEOFDone;
+
+  /* user code: */
+    String cadena = "";
 
 
   /**
@@ -663,6 +665,18 @@ class Lexer {
   }
 
 
+  /**
+   * Contains user EOF-code, which will be executed exactly once,
+   * when the end of file is reached
+   */
+  private void zzDoEOF() throws java.io.IOException {
+    if (!zzEOFDone) {
+      zzEOFDone = true;
+    
+  yyclose();    }
+  }
+
+
 
 
   /**
@@ -672,7 +686,7 @@ class Lexer {
    * @return the next token.
    * @exception java.io.IOException if any I/O-Error occurs.
    */
-  public int yylex() throws java.io.IOException {
+  @Override  public java_cup.runtime.Symbol next_token() throws java.io.IOException {
     int zzInput;
     int zzAction;
 
@@ -808,7 +822,8 @@ class Lexer {
 
       if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
         zzAtEOF = true;
-        return YYEOF;
+            zzDoEOF();
+          { return new java_cup.runtime.Symbol(sym.EOF); }
       }
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
@@ -818,7 +833,7 @@ class Lexer {
             // fall through
           case 49: break;
           case 2:
-            { System.out.println("ENTER");
+            { return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());
             }
             // fall through
           case 50: break;
@@ -828,62 +843,62 @@ class Lexer {
             // fall through
           case 51: break;
           case 4:
-            { System.out.println("STRING");yybegin(STRING);
+            { cadena+="\"";yybegin(STRING);
             }
             // fall through
           case 52: break;
           case 5:
-            { System.out.println("CONCAT STRING");
+            { return new Symbol(sym.CONCATSTRING,yyline,yycolumn,yytext());
             }
             // fall through
           case 53: break;
           case 6:
-            { System.out.println("COMENTARIO");yybegin(COMENTARIO);
+            { yybegin(COMENTARIO);
             }
             // fall through
           case 54: break;
           case 7:
-            { System.out.println("INICIO PARENTESIS");
+            { return new Symbol(sym.PARENTESISL,yyline,yycolumn,yytext());
             }
             // fall through
           case 55: break;
           case 8:
-            { System.out.println("FIN PARENTESIS");
+            { return new Symbol(sym.PARENTESISR,yyline,yycolumn,yytext());
             }
             // fall through
           case 56: break;
           case 9:
-            { System.out.println("OP MULTIPLICACION");
+            { return new Symbol(sym.OPMULTI,yyline,yycolumn,yytext());
             }
             // fall through
           case 57: break;
           case 10:
-            { System.out.println("OP ADICION");
+            { return new Symbol(sym.OPADICION,yyline,yycolumn,yytext());
             }
             // fall through
           case 58: break;
           case 11:
-            { System.out.println("INTEGER");
+            { return new Symbol(sym.INTEGER,yyline,yycolumn,yytext());
             }
             // fall through
           case 59: break;
           case 12:
-            { System.out.println("OP REL");
+            { return new Symbol(sym.OPREL,yyline,yycolumn,yytext());
             }
             // fall through
           case 60: break;
           case 13:
-            { System.out.println(yytext());
+            { return new Symbol(sym.identificador,yyline,yycolumn,yytext());
             }
             // fall through
           case 61: break;
           case 14:
-            { System.out.print(yytext());
+            { cadena+=yytext();
             }
             // fall through
           case 62: break;
           case 15:
-            { System.out.println();yybegin(YYINITIAL);
+            { String temp = cadena + "\""; cadena="";yybegin(YYINITIAL);return new Symbol(sym.STRING,yyline,yycolumn,temp);
             }
             // fall through
           case 63: break;
@@ -893,152 +908,152 @@ class Lexer {
             // fall through
           case 64: break;
           case 17:
-            { System.out.println("AS");
+            { return new Symbol(sym.AS,yyline,yycolumn,yytext());
             }
             // fall through
           case 65: break;
           case 18:
-            { System.out.println("DO");
+            { return new Symbol(sym.DO,yyline,yycolumn,yytext());
             }
             // fall through
           case 66: break;
           case 19:
-            { System.out.println("IF");
+            { return new Symbol(sym.IF,yyline,yycolumn,yytext());
             }
             // fall through
           case 67: break;
           case 20:
-            { System.out.println("OR");
+            { return new Symbol(sym.OR,yyline,yycolumn,yytext());
             }
             // fall through
           case 68: break;
           case 21:
-            { System.out.println("TO");
+            { return new Symbol(sym.TO,yyline,yycolumn,yytext());
             }
             // fall through
           case 69: break;
           case 22:
-            { System.out.println("AND");
+            { return new Symbol(sym.AND,yyline,yycolumn,yytext());
             }
             // fall through
           case 70: break;
           case 23:
-            { System.out.println("DIM");
+            { return new Symbol(sym.DIM,yyline,yycolumn,yytext());
             }
             // fall through
           case 71: break;
           case 24:
-            { System.out.println("END");
+            { return new Symbol(sym.END,yyline,yycolumn,yytext());
             }
             // fall through
           case 72: break;
           case 25:
-            { System.out.println("FOR");
+            { return new Symbol(sym.FOR,yyline,yycolumn,yytext());
             }
             // fall through
           case 73: break;
           case 26:
-            { System.out.println("NOT");
+            { return new Symbol(sym.NOT,yyline,yycolumn,yytext());
             }
             // fall through
           case 74: break;
           case 27:
-            { System.out.println("SUB");
+            { return new Symbol(sym.SUB,yyline,yycolumn,yytext());
             }
             // fall through
           case 75: break;
           case 28:
-            { System.out.println("EXTENDER STRING");
+            { return new Symbol(sym.EXTSTRING,yyline,yycolumn,yytext());
             }
             // fall through
           case 76: break;
           case 29:
-            { System.out.println("ELSE");
+            { return new Symbol(sym.ELSE,yyline,yycolumn,yytext());
             }
             // fall through
           case 77: break;
           case 30:
-            { System.out.println("EXIT");
+            { return new Symbol(sym.EXIT,yyline,yycolumn,yytext());
             }
             // fall through
           case 78: break;
           case 31:
-            { System.out.println("LOOP");
+            { return new Symbol(sym.LOOP,yyline,yycolumn,yytext());
             }
             // fall through
           case 79: break;
           case 32:
-            { System.out.println("NEXT");
+            { return new Symbol(sym.NEXT,yyline,yycolumn,yytext());
             }
             // fall through
           case 80: break;
           case 33:
-            { System.out.println("STEP");
+            { return new Symbol(sym.STEP,yyline,yycolumn,yytext());
             }
             // fall through
           case 81: break;
           case 34:
-            { System.out.println("THEN");
+            { return new Symbol(sym.THEN,yyline,yycolumn,yytext());
             }
             // fall through
           case 82: break;
           case 35:
-            { System.out.println("TRUE");
+            { return new Symbol(sym.TRUE,yyline,yycolumn,yytext());
             }
             // fall through
           case 83: break;
           case 36:
-            { System.out.println("FALSE");
+            { return new Symbol(sym.FALSE,yyline,yycolumn,yytext());
             }
             // fall through
           case 84: break;
           case 37:
-            { System.out.println("UNTIL");
+            { return new Symbol(sym.UNTIL,yyline,yycolumn,yytext());
             }
             // fall through
           case 85: break;
           case 38:
-            { System.out.println("WHILE");
+            { return new Symbol(sym.WHILE,yyline,yycolumn,yytext());
             }
             // fall through
           case 86: break;
           case 39:
-            { System.out.println("ELSE IF");
+            { return new Symbol(sym.ELSEIF,yyline,yycolumn,yytext());
             }
             // fall through
           case 87: break;
           case 40:
-            { System.out.println("MODULE");
+            { return new Symbol(sym.MODULE,yyline,yycolumn,yytext());
             }
             // fall through
           case 88: break;
           case 41:
-            { System.out.println("RETURN");
+            { return new Symbol(sym.RETURN,yyline,yycolumn,yytext());
             }
             // fall through
           case 89: break;
           case 42:
-            { System.out.println("STRINGTYPE");
+            { return new Symbol(sym.STRINGTYPE,yyline,yycolumn,yytext());
             }
             // fall through
           case 90: break;
           case 43:
-            { System.out.println("BOOLEANTYPE");
+            { return new Symbol(sym.BOOLEANTYPE,yyline,yycolumn,yytext());
             }
             // fall through
           case 91: break;
           case 44:
-            { System.out.println("INTEGERTYPE");
+            { return new Symbol(sym.INTEGERTYPE,yyline,yycolumn,yytext());
             }
             // fall through
           case 92: break;
           case 45:
-            { System.out.println("CONTINUE");
+            { return new Symbol(sym.CONTINUE,yyline,yycolumn,yytext());
             }
             // fall through
           case 93: break;
           case 46:
-            { System.out.println("STRUCTURE");
+            { return new Symbol(sym.STRUCTURE,yyline,yycolumn,yytext());
             }
             // fall through
           case 94: break;

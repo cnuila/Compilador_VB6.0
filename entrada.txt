@@ -1,3 +1,6 @@
 If count = 0 Then
+        dim count2 as Integer = 0
+        If count = 0 Then
         dim count2 as Integer = 0          
+        End If           
 End If           

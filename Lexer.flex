@@ -68,8 +68,8 @@ CONCATSTRING = &
     {inicioComentario}      {yybegin(COMENTARIO);}
     {READ}                  {System.out.println("READ CONSOLE");}
     {WRITE}                 {System.out.println("WRITE IN CONSOLE");}
-    {DIM}                   {System.out.println("DIM");return new Symbol(sym.DIM,yyline,yycolumn,yytext());}
-    {AS}                    {System.out.println("AS");return new Symbol(sym.AS,yyline,yycolumn,yytext());}
+    {DIM}                   {return new Symbol(sym.DIM,yyline,yycolumn,yytext());}
+    {AS}                    {return new Symbol(sym.AS,yyline,yycolumn,yytext());}
     {BOOLEANTYPE}           {return new Symbol(sym.BOOLEANTYPE,yyline,yycolumn,yytext());}
     {TRUE}                  {return new Symbol(sym.TRUE,yyline,yycolumn,yytext());}
     {FALSE}                 {return new Symbol(sym.FALSE,yyline,yycolumn,yytext());}
@@ -80,16 +80,16 @@ CONCATSTRING = &
     {EXTSTRING}             {return new Symbol(sym.EXTSTRING,yyline,yycolumn,yytext());} 
     {CONCATSTRING}          {return new Symbol(sym.CONCATSTRING,yyline,yycolumn,yytext());}
     {OPREL}                 {return new Symbol(sym.OPREL,yyline,yycolumn,yytext());}
-    {IGUAL}                 {System.out.println("IGUAL");return new Symbol(sym.IGUAL,yyline,yycolumn,yytext());}
+    {IGUAL}                 {return new Symbol(sym.IGUAL,yyline,yycolumn,yytext());}
     {OPADICION}             {return new Symbol(sym.OPADICION,yyline,yycolumn,yytext());}    
     {OPMULTI}               {return new Symbol(sym.OPMULTI,yyline,yycolumn,yytext());}    
-    {END}                   {System.out.println("END");return new Symbol(sym.END,yyline,yycolumn,yytext());}
+    {END}                   {return new Symbol(sym.END,yyline,yycolumn,yytext());}
     {EXIT}                  {return new Symbol(sym.EXIT,yyline,yycolumn,yytext());}
     {CONTINUE}              {return new Symbol(sym.CONTINUE,yyline,yycolumn,yytext());}
     {ELSEIF}                {return new Symbol(sym.ELSEIF,yyline,yycolumn,yytext());}
-    {IF}                    {System.out.println("IF");return new Symbol(sym.IF,yyline,yycolumn,yytext());}
+    {IF}                    {return new Symbol(sym.IF,yyline,yycolumn,yytext());}
     {ELSE}                  {return new Symbol(sym.ELSE,yyline,yycolumn,yytext());}
-    {THEN}                  {System.out.println("THEN");return new Symbol(sym.THEN,yyline,yycolumn,yytext());}    
+    {THEN}                  {return new Symbol(sym.THEN,yyline,yycolumn,yytext());}    
     {AND}                   {return new Symbol(sym.AND,yyline,yycolumn,yytext());}
     {OR}                    {return new Symbol(sym.OR,yyline,yycolumn,yytext());}
     {NOT}                   {return new Symbol(sym.NOT,yyline,yycolumn,yytext());}
@@ -107,8 +107,8 @@ CONCATSTRING = &
     {STRUCTURE}             {return new Symbol(sym.STRUCTURE,yyline,yycolumn,yytext());}
     {PARENTESISL}           {return new Symbol(sym.PARENTESISL,yyline,yycolumn,yytext());}
     {PARENTESISR}           {return new Symbol(sym.PARENTESISR,yyline,yycolumn,yytext());}     
-    {identificador}         {System.out.println(yytext());return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
-    {saltoLinea}            {System.out.println("enter");return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
+    {identificador}         {return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
+    {saltoLinea}            {return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
     {espacio}               {}
     .                       {System.out.println("Error léxico en: " + yyline + " " + yycolumn);}    
 }

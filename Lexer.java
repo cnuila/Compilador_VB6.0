@@ -834,7 +834,7 @@ class Lexer implements java_cup.runtime.Scanner {
             // fall through
           case 50: break;
           case 2:
-            { System.out.println("enter");return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());
+            { return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());
             }
             // fall through
           case 51: break;
@@ -889,12 +889,12 @@ class Lexer implements java_cup.runtime.Scanner {
             // fall through
           case 61: break;
           case 13:
-            { System.out.println("IGUAL");return new Symbol(sym.IGUAL,yyline,yycolumn,yytext());
+            { return new Symbol(sym.IGUAL,yyline,yycolumn,yytext());
             }
             // fall through
           case 62: break;
           case 14:
-            { System.out.println(yytext());return new Symbol(sym.identificador,yyline,yycolumn,yytext());
+            { return new Symbol(sym.identificador,yyline,yycolumn,yytext());
             }
             // fall through
           case 63: break;
@@ -914,7 +914,7 @@ class Lexer implements java_cup.runtime.Scanner {
             // fall through
           case 66: break;
           case 18:
-            { System.out.println("AS");return new Symbol(sym.AS,yyline,yycolumn,yytext());
+            { return new Symbol(sym.AS,yyline,yycolumn,yytext());
             }
             // fall through
           case 67: break;
@@ -924,7 +924,7 @@ class Lexer implements java_cup.runtime.Scanner {
             // fall through
           case 68: break;
           case 20:
-            { System.out.println("IF");return new Symbol(sym.IF,yyline,yycolumn,yytext());
+            { return new Symbol(sym.IF,yyline,yycolumn,yytext());
             }
             // fall through
           case 69: break;
@@ -944,12 +944,12 @@ class Lexer implements java_cup.runtime.Scanner {
             // fall through
           case 72: break;
           case 24:
-            { System.out.println("DIM");return new Symbol(sym.DIM,yyline,yycolumn,yytext());
+            { return new Symbol(sym.DIM,yyline,yycolumn,yytext());
             }
             // fall through
           case 73: break;
           case 25:
-            { System.out.println("END");return new Symbol(sym.END,yyline,yycolumn,yytext());
+            { return new Symbol(sym.END,yyline,yycolumn,yytext());
             }
             // fall through
           case 74: break;
@@ -999,7 +999,7 @@ class Lexer implements java_cup.runtime.Scanner {
             // fall through
           case 83: break;
           case 35:
-            { System.out.println("THEN");return new Symbol(sym.THEN,yyline,yycolumn,yytext());
+            { return new Symbol(sym.THEN,yyline,yycolumn,yytext());
             }
             // fall through
           case 84: break;

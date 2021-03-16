@@ -16,12 +16,12 @@ nonterminal STATEMENT, SIGUIENTEIF, CONDICION, CONDICIONP, VALOR, OPCONDICION, T
 
 start with STATEMENT;
 
-STATEMENT   ::= IF CONDICION THEN saltoLinea SIGUIENTEIF END IF STATEMENT
+STATEMENT   ::= IF CONDICION THEN saltoLinea STATEMENT SIGUIENTEIF END IF STATEMENT
                                             {:
                                                 System.out.println("if terminado");
                                             :}                                            
 ;
-SIGUIENTEIF ::= ELSEIF CONDICION THEN saltoLinea SIGUIENTEIF | ELSE saltoLinea STATEMENT | STATEMENT;
+SIGUIENTEIF ::= ELSEIF CONDICION THEN saltoLinea STATEMENT SIGUIENTEIF | ELSE saltoLinea STATEMENT|;
 
 STATEMENT   ::= DECLARACION saltoLinea STATEMENT | saltoLinea | {:System.out.println("vacio");:};
 

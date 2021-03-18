@@ -880,7 +880,7 @@ class Lexer implements java_cup.runtime.Scanner {
             // fall through
           case 60: break;
           case 11:
-            { return new Symbol(sym.COMA,yyline,yycolumn,yytext());
+            { System.out.println("COMA");return new Symbol(sym.COMA,yyline,yycolumn,yytext());
             }
             // fall through
           case 61: break;

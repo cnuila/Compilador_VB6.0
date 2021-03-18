@@ -78,9 +78,8 @@ COMA = ,
     {INTEGERTYPE}           {return new Symbol(sym.INTEGERTYPE,yyline,yycolumn,yytext());}
     {INTEGER}               {return new Symbol(sym.INTEGER,yyline,yycolumn,yytext());}
     {STRINGTYPE}            {return new Symbol(sym.STRINGTYPE,yyline,yycolumn,yytext());}
-    {delimitadorString}     {cadena+="\"";yybegin(STRING);}  
-    {EXTSTRING}             {return new Symbol(sym.EXTSTRING,yyline,yycolumn,yytext());} 
-    {CONCATSTRING}          {return new Symbol(sym.CONCATSTRING,yyline,yycolumn,yytext());}
+    {delimitadorString}     {cadena+="\"";yybegin(STRING);} 
+    {CONCATSTRING}          {return new Symbol(sym.CONCATSTRING,yyline,yycolumn,yytext());} 
     {OPREL}                 {return new Symbol(sym.OPREL,yyline,yycolumn,yytext());}
     {IGUAL}                 {System.out.println("IGUAL");return new Symbol(sym.IGUAL,yyline,yycolumn,yytext());}
     {OPADICION}             {return new Symbol(sym.OPADICION,yyline,yycolumn,yytext());}    
@@ -117,6 +116,7 @@ COMA = ,
 
 <STRING> {
     {delimitadorString}     {String temp = cadena + "\""; cadena="";yybegin(YYINITIAL);return new Symbol(sym.STRING,yyline,yycolumn,temp);}
+    {EXTSTRING}             {}
     .                       {cadena+=yytext();}    
 }
 

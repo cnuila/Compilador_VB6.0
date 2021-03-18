@@ -1,9 +1,11 @@
 If count = 0 Then
-        dim count2 as Integer = 0
+        dim a as Integer = 0
         If count = 0 Then
         dim count2 as Integer = 0  
         elseif count = 2 then
         dim count2 as Integer = 0
+        Dim a, b, c As Boolean, x, y As String, i As Integer
+        Dim a,d as Integer
         else                                              
         End If           
 End If           

@@ -46,7 +46,7 @@ SUB = sub
 inicioComentario = '
 PARENTESISL = "("
 PARENTESISR = ")"
-EXTSTRING = " &_"{saltoLinea}
+EXTSTRING = "\"&_"{saltoLinea}{espacio}"\""
 READ = console"."readline
 WRITE = console"."writeline
 CONTINUE = continue
@@ -63,15 +63,16 @@ LOOP = loop
 RETURN = return
 CONCATSTRING = &
 COMA = ,
+FUNCTION = function
 
 %%
 <YYINITIAL> {
     {inicioComentario}      {yybegin(COMENTARIO);}
     {READ}                  {System.out.println("READ CONSOLE");}
     {WRITE}                 {System.out.println("WRITE IN CONSOLE");}
-    {DIM}                   {System.out.println("DIM");return new Symbol(sym.DIM,yyline,yycolumn,yytext());}
-    {COMA}                  {System.out.println("COMA");return new Symbol(sym.COMA,yyline,yycolumn,yytext());}
-    {AS}                    {System.out.println("AS");return new Symbol(sym.AS,yyline,yycolumn,yytext());}
+    {DIM}                   {return new Symbol(sym.DIM,yyline,yycolumn,yytext());}
+    {COMA}                  {return new Symbol(sym.COMA,yyline,yycolumn,yytext());}
+    {AS}                    {return new Symbol(sym.AS,yyline,yycolumn,yytext());}
     {BOOLEANTYPE}           {return new Symbol(sym.BOOLEANTYPE,yyline,yycolumn,yytext());}
     {TRUE}                  {return new Symbol(sym.TRUE,yyline,yycolumn,yytext());}
     {FALSE}                 {return new Symbol(sym.FALSE,yyline,yycolumn,yytext());}
@@ -81,7 +82,7 @@ COMA = ,
     {delimitadorString}     {cadena+="\"";yybegin(STRING);} 
     {CONCATSTRING}          {return new Symbol(sym.CONCATSTRING,yyline,yycolumn,yytext());} 
     {OPREL}                 {return new Symbol(sym.OPREL,yyline,yycolumn,yytext());}
-    {IGUAL}                 {System.out.println("IGUAL");return new Symbol(sym.IGUAL,yyline,yycolumn,yytext());}
+    {IGUAL}                 {return new Symbol(sym.IGUAL,yyline,yycolumn,yytext());}
     {OPADICION}             {return new Symbol(sym.OPADICION,yyline,yycolumn,yytext());}    
     {OPMULTI}               {return new Symbol(sym.OPMULTI,yyline,yycolumn,yytext());}    
     {END}                   {return new Symbol(sym.END,yyline,yycolumn,yytext());}
@@ -104,19 +105,20 @@ COMA = ,
     {LOOP}                  {return new Symbol(sym.LOOP,yyline,yycolumn,yytext());}
     {RETURN}                {return new Symbol(sym.RETURN,yyline,yycolumn,yytext());}
     {MODULE}                {return new Symbol(sym.MODULE,yyline,yycolumn,yytext());}
+    {FUNCTION}              {return new Symbol(sym.FUNCTION,yyline,yycolumn,yytext());}
     {SUB}                   {return new Symbol(sym.SUB,yyline,yycolumn,yytext());}
     {STRUCTURE}             {return new Symbol(sym.STRUCTURE,yyline,yycolumn,yytext());}
     {PARENTESISL}           {return new Symbol(sym.PARENTESISL,yyline,yycolumn,yytext());}
     {PARENTESISR}           {return new Symbol(sym.PARENTESISR,yyline,yycolumn,yytext());}     
-    {identificador}         {System.out.println(yytext());return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
-    {saltoLinea}            {System.out.println("enter");return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
+    {identificador}         {return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
+    {saltoLinea}            {return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
     {espacio}               {}
     .                       {System.out.println("Error léxico en: " + yyline + " " + yycolumn);}    
 }
 
 <STRING> {
-    {delimitadorString}     {String temp = cadena + "\""; cadena="";yybegin(YYINITIAL);return new Symbol(sym.STRING,yyline,yycolumn,temp);}
     {EXTSTRING}             {}
+    {delimitadorString}     {String temp = cadena + "\""; cadena="";yybegin(YYINITIAL);return new Symbol(sym.STRING,yyline,yycolumn,temp);}    
     .                       {cadena+=yytext();}    
 }
 

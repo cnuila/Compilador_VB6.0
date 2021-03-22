@@ -1,11 +1,15 @@
 Module VbModule
-        dim a as Integer = 0
+        dim a as Integer = (2+3)/(3+5)
 
-
+        function MyFunction(j As Integer) As Integer
+                If count = 0 Then
+                                dim count2 as Integer = 0  
+                end if
+        End Function
 
         Sub Main()
                 If count = 0 Then
-                        dim a as Integer = 0
+                        a = 0 + 4 * 5 + (2+3) * (3+5)
                         If count = 0 Then
                                 dim count2 as Integer = 0  
 
@@ -14,10 +18,13 @@ Module VbModule
                                 dim count2 as Integer = 0
                                 Dim a, b, c As Boolean, x, y As String, i As Integer
                                 Dim a,d as Integer
-                        else                                              
+                                x = "Hola jeej" & " ADios"
+                                y = "Aqui empiezo"&_
+                                        "Aqui sigo"
+                        else                                             
+                        Exit Sub 
                         End If           
-                End If
-                Exit Sub
+                End If                
         end sub
         dim a as Integer = 0         
 end Module

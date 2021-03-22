@@ -6,6 +6,7 @@
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
+  public static final int FUNCTION = 43;
   public static final int PARENTESISR = 28;
   public static final int PARENTESISL = 27;
   public static final int INTEGER = 17;
@@ -92,7 +93,8 @@ public class sym {
   "LOOP",
   "RETURN",
   "CONCATSTRING",
-  "STRING"
+  "STRING",
+  "FUNCTION"
   };
 }
 

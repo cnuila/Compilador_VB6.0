@@ -46,8 +46,8 @@ SUB = sub
 inicioComentario = '
 PARENTESISL = "("
 PARENTESISR = ")"
-EXTSTRING = "\"&_"{saltoLinea}{espacio}"\""
-READ = console"."readline
+EXTSTRING = \""&_"{saltoLinea}{espacio}\"
+READ = console"."readline{PARENTESISL}{PARENTESISR}
 WRITE = console"."writeline
 CONTINUE = continue
 EXIT = exit
@@ -68,8 +68,8 @@ FUNCTION = function
 %%
 <YYINITIAL> {
     {inicioComentario}      {yybegin(COMENTARIO);}
-    {READ}                  {System.out.println("READ CONSOLE");}
-    {WRITE}                 {System.out.println("WRITE IN CONSOLE");}
+    {READ}                  {return new Symbol(sym.READ,yyline,yycolumn,yytext());}
+    {WRITE}                 {return new Symbol(sym.WRITE,yyline,yycolumn,yytext());}
     {DIM}                   {return new Symbol(sym.DIM,yyline,yycolumn,yytext());}
     {COMA}                  {return new Symbol(sym.COMA,yyline,yycolumn,yytext());}
     {AS}                    {return new Symbol(sym.AS,yyline,yycolumn,yytext());}

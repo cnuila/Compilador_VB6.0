@@ -13,6 +13,7 @@ public class sym {
   public static final int CONTINUE = 29;
   public static final int identificador = 8;
   public static final int FOR = 31;
+  public static final int WRITE = 45;
   public static final int NOT = 24;
   public static final int AND = 22;
   public static final int OPMULTI = 21;
@@ -36,6 +37,7 @@ public class sym {
   public static final int OPADICION = 20;
   public static final int MODULE = 25;
   public static final int ELSE = 3;
+  public static final int READ = 44;
   public static final int TO = 32;
   public static final int WHILE = 36;
   public static final int STRINGTYPE = 18;
@@ -94,7 +96,9 @@ public class sym {
   "RETURN",
   "CONCATSTRING",
   "STRING",
-  "FUNCTION"
+  "FUNCTION",
+  "READ",
+  "WRITE"
   };
 }
 

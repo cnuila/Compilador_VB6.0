@@ -114,10 +114,10 @@ class Lexer implements java_cup.runtime.Scanner {
     "\2\0\2\50\1\17\1\0\1\17\1\51\1\52\1\53"+
     "\1\17\1\53\2\0\1\54\2\17\2\0\1\17\1\0"+
     "\1\55\1\17\1\55\2\0\2\56\2\57\1\17\3\0"+
-    "\2\60\14\0\1\61\1\0\1\62";
+    "\2\60\17\0\1\61\1\62";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[219];
+    int [] result = new int[221];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -169,10 +169,10 @@ class Lexer implements java_cup.runtime.Scanner {
     "\0\u16f8\0\u1722\0\u0276\0\176\0\u0276\0\176\0\u174c\0\u1776"+
     "\0\u17a0\0\u17ca\0\u0276\0\176\0\u17f4\0\u181e\0\u1848\0\u1872"+
     "\0\u189c\0\u18c6\0\u18f0\0\u191a\0\u1944\0\u196e\0\u1998\0\u19c2"+
-    "\0\176\0\u19ec\0\176";
+    "\0\u19ec\0\u1a16\0\u1a40\0\176\0\176";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[219];
+    int [] result = new int[221];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -292,10 +292,11 @@ class Lexer implements java_cup.runtime.Scanner {
     "\1\320\15\0\1\320\26\0\1\321\67\0\1\322\42\0"+
     "\1\323\43\0\1\324\55\0\1\325\15\0\1\325\35\0"+
     "\1\326\53\0\1\327\45\0\1\330\15\0\1\330\27\0"+
-    "\1\331\61\0\1\332\41\0\1\333\23\0";
+    "\1\331\61\0\1\332\23\0\1\333\67\0\1\334\34\0"+
+    "\1\335\40\0";
 
   private static int [] zzUnpackTrans() {
-    int [] result = new int[6678];
+    int [] result = new int[6762];
     int offset = 0;
     offset = zzUnpackTrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -348,10 +349,10 @@ class Lexer implements java_cup.runtime.Scanner {
     "\1\11\3\0\3\1\2\0\1\1\1\11\1\1\1\0"+
     "\5\1\1\11\2\0\3\1\2\0\1\1\1\0\2\1"+
     "\1\11\2\0\1\1\1\11\1\1\1\11\1\1\3\0"+
-    "\1\1\1\11\14\0\1\11\1\0\1\11";
+    "\1\1\1\11\17\0\2\11";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[219];
+    int [] result = new int[221];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -1077,12 +1078,12 @@ class Lexer implements java_cup.runtime.Scanner {
             // fall through
           case 98: break;
           case 49:
-            { System.out.println("READ CONSOLE");
+            { return new Symbol(sym.WRITE,yyline,yycolumn,yytext());
             }
             // fall through
           case 99: break;
           case 50:
-            { System.out.println("WRITE IN CONSOLE");
+            { return new Symbol(sym.READ,yyline,yycolumn,yytext());
             }
             // fall through
           case 100: break;

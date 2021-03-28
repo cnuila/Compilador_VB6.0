@@ -61,7 +61,7 @@ DO = do
 UNTIL = until
 LOOP = loop
 RETURN = return
-CONCATSTRING = &
+CONCATSTRING = "&"
 COMA = ,
 FUNCTION = function
 
@@ -113,7 +113,7 @@ FUNCTION = function
     {identificador}         {return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
     {saltoLinea}            {return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
     {espacio}               {}
-    .                       {System.out.println("Error léxico en: " + yyline + " " + yycolumn);}    
+    .                       {System.out.println("Error léxico en: " + (yyline + 1) + " " + (yycolumn + 1));}    
 }
 
 <STRING> {

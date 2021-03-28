@@ -40,13 +40,16 @@ SUBPROCE    ::= SUB identificador PARENTESISL PARAMS PARENTESISR saltoLinea SUBI
                 | SUB identificador PARENTESISL PARAMS PARENTESISR error SUBINSTRUC END SUB {: System.out.println("Se esperaba un salto de linea en el encabezado del sub"); :}
 ;
 
-SUBINSTRUC  ::= DECLARACION SUBINSTRUC | saltoLinea SUBINSTRUC | EXIT SUB SUBINSTRUC | ASIGN SUBINSTRUC | CALL SUBINSTRUC | WRCONSOLE SUBINSTRUC| IFSUB SUBINSTRUC | error SUBINSTRUC {: System.out.println("Entro a este"); :}| ;
+SUBINSTRUC  ::= DECLARACION SUBINSTRUC | saltoLinea SUBINSTRUC | EXIT SUB SUBINSTRUC | ASIGN SUBINSTRUC | CALL SUBINSTRUC | WRCONSOLE SUBINSTRUC| IFSUB SUBINSTRUC 
+                | error SUBINSTRUC {: System.out.println("Error desconocido"); :}
+                | error SUB SUBINSTRUC {: System.out.println("Se esperaba un EXIT o END"); :}                 
+                | ;
 
 IFSUB       ::= IF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB END IF
                 | IF error THEN saltoLinea SUBINSTRUC SIFSUB END IF {: System.out.println("Error en codición del if"); :}
                 | IF CONDICION error saltoLinea SUBINSTRUC SIFSUB END IF {: System.out.println("Se esperaba un THEN"); :}
                 | IF CONDICION THEN error SUBINSTRUC SIFSUB END IF {: System.out.println("Se esperaba un salto de linea"); :}
-                | IF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB END error {: System.out.println("Se esperaba un IF"); :}                
+                | IF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB END error {: System.out.println("Se esperaba un IF"); :}
 ;
 
 SIFSUB      ::= ELSEIF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB 
@@ -68,7 +71,11 @@ FUNC        ::= FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS TIPO sa
                 | FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS TIPO error FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un salto de línea en el encabezado de la función"); :}
 ;
 
-FUNCINSTRUC ::= DECLARACION FUNCINSTRUC | saltoLinea FUNCINSTRUC | EXIT FUNCTION FUNCINSTRUC | ASIGN FUNCINSTRUC | RETVAL FUNCINSTRUC | CALL FUNCINSTRUC | WRCONSOLE FUNCINSTRUC | IFFUNC FUNCINSTRUC | ;
+FUNCINSTRUC ::= DECLARACION FUNCINSTRUC | saltoLinea FUNCINSTRUC | EXIT FUNCTION FUNCINSTRUC | ASIGN FUNCINSTRUC | RETVAL FUNCINSTRUC | CALL FUNCINSTRUC | WRCONSOLE FUNCINSTRUC | IFFUNC FUNCINSTRUC 
+                | 
+                | error FUNC FUNCINSTRUC {: System.out.println("Se esperaba un EXIT o END"); :} 
+                | error FUNCINSTRUC {: System.out.println("Error desconocido"); :}       
+;
 
 IFFUNC      ::= IF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC END IF
                 | IF error THEN saltoLinea FUNCINSTRUC SIFFUNC END IF {: System.out.println("Error en codición del if"); :}
@@ -122,8 +129,8 @@ UNIRSTRNG   ::= VALUNIRSTR CONCATSTRING UNIRSTRNG | VALUNIRSTR CONCATSTRING VALU
 VALUNIRSTR  ::= STRING | identificador | error {: System.out.println("Se esperaba un valor String"); :};
 
 ASIGNINT    ::= identificador OPASING VALINT
-                | identificador error VALINT {: System.out.println("Error en asiganción"); :}
-                | error OPASING VALINT {: System.out.println("Error en asiganción"); :}
+                | identificador error VALINT {: System.out.println("Error en asignación"); :}
+                | error OPASING VALINT {: System.out.println("Error en asignación"); :}
 ;
 
 OPASING     ::= IGUAL | OPMULTI IGUAL | OPADICION IGUAL;
@@ -152,7 +159,7 @@ TIPO        ::= INTEGERTYPE | STRINGTYPE | BOOLEANTYPE;
 
 //gramática escribir en consola
 WRCONSOLE   ::= WRITE PARENTESISL VALWR PARENTESISR
-                | WRITE error VALWR PARENTESISR {: System.out.println("Error en WRITE"); :}       
+                | WRITE error VALWR PARENTESISR {: System.out.println("Error en console.write"); :}       
                 
 ;
 VALWR       ::= identificador | STRING | UNIRSTRNG | error {: System.out.println("Se esperaba un String"); :};

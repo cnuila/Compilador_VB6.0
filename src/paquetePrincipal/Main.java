@@ -103,14 +103,24 @@ public class Main extends javax.swing.JFrame {
             Lexer scanner = new Lexer(new FileReader(archivoActual));
             parser miParser = new parser(scanner);
             miParser.parse();
+            String log = "Inicia el analisis\n";
+            jtext_log.setText(log);
             if (miParser.errores.isEmpty()) {
                 String formato = "edge [color=blue];" + hacerDFS(miParser.raiz);
                 miParser.raiz.exportarArbol(formato, "AST");
+                log+="Se genero el arbol AST\n";
+                jtext_log.setText("");
+                jtext_log.setText(log);
             } else {
                 for(int i = 0; i < miParser.errores.size();i++){
-                    System.out.println(miParser.errores.get(i));
+                    log += miParser.errores.get(i) + "\n";
                 }
+                jtext_log.setText("");
+                jtext_log.setText(log);
             }
+            log+= "Finalizo el analisas\n";
+            jtext_log.setText("");
+            jtext_log.setText(log);
         } catch (Exception e) {
             System.out.println(e);
         }

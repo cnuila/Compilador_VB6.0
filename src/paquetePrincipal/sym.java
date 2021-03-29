@@ -12,7 +12,6 @@ public class sym {
   public static final int PARENTESISR = 31;
   public static final int PARENTESISL = 30;
   public static final int INTEGER = 19;
-  public static final int PRIVATE = 49;
   public static final int CONTINUE = 32;
   public static final int identificador = 10;
   public static final int FOR = 34;
@@ -42,13 +41,10 @@ public class sym {
   public static final int OPADICION = 22;
   public static final int MODULE = 28;
   public static final int ELSE = 3;
-  public static final int PROTECTED = 50;
   public static final int READ = 46;
-  public static final int FRIENDS = 51;
   public static final int TO = 35;
   public static final int WHILE = 38;
   public static final int STRINGTYPE = 20;
-  public static final int PUBLIC = 48;
   public static final int saltoLinea = 11;
   public static final int THEN = 5;
   public static final int STRUCTURE = 8;
@@ -108,11 +104,7 @@ public class sym {
   "STRING",
   "FUNCTION",
   "READ",
-  "WRITE",
-  "PUBLIC",
-  "PRIVATE",
-  "PROTECTED",
-  "FRIENDS"
+  "WRITE"
   };
 }
 

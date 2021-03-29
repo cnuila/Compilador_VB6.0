@@ -111,7 +111,9 @@ public class Main extends javax.swing.JFrame {
     
 
     public static void DFS(Nodo node, ArrayList<String> recorrido) {
-        recorrido.add(node.toString());
+        if(!node.getEtiqueta().equals("VACIO")){
+            recorrido.add(node.toString());
+        }        
         for (int i = 0; i < node.getHijos().size(); i++) {
             DFS(node.getHijos().get(i),recorrido);
         }
@@ -119,7 +121,9 @@ public class Main extends javax.swing.JFrame {
 
     public static void DFSAristas(Nodo node,int padre, ArrayList<String> recorrido) {
         if(node.getIdNodo() != padre){
-            recorrido.add(padre+"->"+node.getIdNodo()+";");
+            if(!node.getEtiqueta().equals("VACIO")){
+                recorrido.add(padre+"->"+node.getIdNodo()+";");
+            }            
         }        
         for (int i = 0; i < node.getHijos().size(); i++) {
             DFSAristas(node.getHijos().get(i),node.getIdNodo(), recorrido);

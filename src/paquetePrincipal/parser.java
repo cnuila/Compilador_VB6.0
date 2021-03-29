@@ -3554,7 +3554,7 @@ class CUP$parser$actions {
 		
                     Nodo node = new Nodo("=",parser.cont);
                     parser.cont++;
-                    node.addHijo(new Nodo("BOOLEAN",parser.cont));
+                    node.addHijo(new Nodo("STRING",parser.cont));
                     parser.cont++;
                     node.addHijo(new Nodo(ustr,parser.cont));
                     parser.cont++;

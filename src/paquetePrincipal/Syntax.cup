@@ -129,7 +129,6 @@ MDLINP      ::= DECLARACION:d MDLINP:m {:
                 :};
 
 //Intrucciones de una Structure
-<<<<<<< HEAD
 STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea DECLARACIONESSTRUCT:d END STRUCTURE{:
                             Nodo node = new Nodo("STRUCTURE",parser.cont);
                             parser.cont++;
@@ -140,10 +139,10 @@ STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea DECLARACIONESSTRUCT:d
                             }
                             RESULT = node;
                 :}
-                     | STRUCTURE error saltoLinea DECLARACION END STRUCTURE {: System.out.println("Se esperaba un identificador para la structure"); :}
-                     | STRUCTURE identificador error DECLARACION END STRUCTURE {: System.out.println("Se esperaba un salto de linea"); :}
-                     | STRUCTURE identificador saltoLinea error END STRUCTURE {: System.out.println("error en la declaracion del structure"); :}
-                     | STRUCTURE identificador saltoLinea DECLARACION END error {: System.out.println("Se esperaba un identificador para la structure"); :}
+                     | STRUCTURE error saltoLinea DECLARACION END STRUCTURE {: errores.add("Se esperaba un identificador para la structure"); :}
+                     | STRUCTURE identificador error DECLARACION END STRUCTURE {: errores.add("Se esperaba un salto de linea"); :}
+                     | STRUCTURE identificador saltoLinea error END STRUCTURE {: errores.add("error en la declaracion del structure"); :}
+                     | STRUCTURE identificador saltoLinea DECLARACION END error {: errores.add("Se esperaba un identificador para la structure"); :}
 ;
 DECLARACIONESSTRUCT ::= DECLARACION:d DECLARACIONESSTRUCT:ds {:
                             Nodo node = new Nodo("DECLARACION",parser.cont);
@@ -160,10 +159,6 @@ DECLARACIONESSTRUCT ::= DECLARACION:d DECLARACIONESSTRUCT:ds {:
                     RESULT = node;
                 :}
 ;
-=======
-STRUCTUREDECLA   ::= STRUCTURE identificador saltoLinea DECLARACION END STRUCTURE;
-
->>>>>>> 881caefdada6636574abdf62605ee6e262ab7d24
 //Instrucciones de un subprocedure
 SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea SUBINSTRUC:s END SUB {:
                         Nodo node = new Nodo("SUB",parser.cont);
@@ -244,7 +239,6 @@ SUBINSTRUC  ::= DECLARACION:d SUBINSTRUC:s {:
                     }                   
                     RESULT = node;
                 :}
-<<<<<<< HEAD
                 | FORSUB:f SUBINSTRUC:s {: 
                     Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
                     parser.cont++;
@@ -263,13 +257,8 @@ SUBINSTRUC  ::= DECLARACION:d SUBINSTRUC:s {:
                     }                   
                     RESULT = node;
                 :}
-                | error SUBINSTRUC {: System.out.println("Error desconocido"); :}
-                | error SUB SUBINSTRUC {: System.out.println("Se esperaba un EXIT o END"); :}                 
-=======
-                | FORSUB SUBINSTRUC| DOWHILESUB SUBINSTRUC
                 | error SUBINSTRUC {: errores.add("Error desconocido"); :}
                 | error SUB SUBINSTRUC {: errores.add("Se esperaba un EXIT o END"); :}                 
->>>>>>> 881caefdada6636574abdf62605ee6e262ab7d24
                 | {:
                     Nodo node = new Nodo("VACIO",parser.cont);
                     parser.cont++;                                   
@@ -319,11 +308,10 @@ SIFSUB      ::= ELSEIF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 {:
                     parser.cont++;                                   
                     RESULT = node;
                 :}                
-<<<<<<< HEAD
-                | ELSEIF error THEN saltoLinea SUBINSTRUC SIFSUB {: System.out.println("Error en la condición"); :}
-                | ELSEIF CONDICION error saltoLinea SUBINSTRUC SIFSUB {: System.out.println("Se esperaba un THEN"); :}
-                | ELSEIF CONDICION THEN error SUBINSTRUC SIFSUB {: System.out.println("Se esperaba un salto de línea"); :}
-                | ELSE error SUBINSTRUC {: System.out.println("Se esperaba un salto de línea"); :}
+                | ELSEIF error THEN saltoLinea SUBINSTRUC SIFSUB {: errores.add("Error en la condición"); :}
+                | ELSEIF CONDICION error saltoLinea SUBINSTRUC SIFSUB {: errores.add("Se esperaba un THEN"); :}
+                | ELSEIF CONDICION THEN error SUBINSTRUC SIFSUB {: errores.add("Se esperaba un salto de línea"); :}
+                | ELSE error SUBINSTRUC {: errores.add("Se esperaba un salto de línea"); :}
 ;
 
 DOWHILESUB  ::= DO WHILE CONDICION:c saltoLinea SUBINSTRUC:s LOOP{:
@@ -335,11 +323,11 @@ DOWHILESUB  ::= DO WHILE CONDICION:c saltoLinea SUBINSTRUC:s LOOP{:
                             }
                             RESULT = node;
                 :}
-                | error WHILE CONDICION saltoLinea SUBINSTRUC LOOP {: System.out.println("Se esperaba un DO"); :}
-                | DO error CONDICION saltoLinea SUBINSTRUC LOOP {: System.out.println("Se esperaba un WHILE"); :}
-                | DO WHILE error saltoLinea SUBINSTRUC LOOP {: System.out.println("Error en la condicion"); :}
-                | DO WHILE CONDICION error SUBINSTRUC LOOP {: System.out.println("Se esperaba un salto de linea"); :}
-                | DO WHILE CONDICION saltoLinea SUBINSTRUC error {: System.out.println("Se esperaba un LOOP"); :}
+                | error WHILE CONDICION saltoLinea SUBINSTRUC LOOP {: errores.add("Se esperaba un DO"); :}
+                | DO error CONDICION saltoLinea SUBINSTRUC LOOP {: errores.add("Se esperaba un WHILE"); :}
+                | DO WHILE error saltoLinea SUBINSTRUC LOOP {: errores.add("Error en la condicion"); :}
+                | DO WHILE CONDICION error SUBINSTRUC LOOP {: errores.add("Se esperaba un salto de linea"); :}
+                | DO WHILE CONDICION saltoLinea SUBINSTRUC error {: errores.add("Se esperaba un LOOP"); :}
 ;
 
 FORSUB      ::= FOR COUNTER:c TO OPARIT:o saltoLinea SUBINSTRUC:s NEXT{:
@@ -352,22 +340,12 @@ FORSUB      ::= FOR COUNTER:c TO OPARIT:o saltoLinea SUBINSTRUC:s NEXT{:
                             }
                             RESULT = node;
                 :}
-                | error COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Se esperaba un FOR"); :}
-                | FOR error TO OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Error en la asignacion del contador del for"); :}
-                | FOR COUNTER error OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Se esperaba un TO"); :}
-                | FOR COUNTER TO OPARIT error SUBINSTRUC NEXT {: System.out.println("Se esperaba un salto de linea"); :}
-                | FOR COUNTER TO OPARIT saltoLinea SUBINSTRUC error {: System.out.println("Se esperaba un NEXT"); :}
+                | error COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT {: errores.add("Se esperaba un FOR"); :}
+                | FOR error TO OPARIT saltoLinea SUBINSTRUC NEXT {: errores.add("Error en la asignacion del contador del for"); :}
+                | FOR COUNTER error OPARIT saltoLinea SUBINSTRUC NEXT {: errores.add("Se esperaba un TO"); :}
+                | FOR COUNTER TO OPARIT error SUBINSTRUC NEXT {: errores.add("Se esperaba un salto de linea"); :}
+                | FOR COUNTER TO OPARIT saltoLinea SUBINSTRUC error {: errores.add("Se esperaba un NEXT"); :}
 ;
-=======
-                | ELSEIF error THEN saltoLinea SUBINSTRUC SIFSUB {: errores.add("Error en la condición"); :}
-                | ELSEIF CONDICION error saltoLinea SUBINSTRUC SIFSUB {: errores.add("Se esperaba un THEN"); :}
-                | ELSEIF CONDICION THEN error SUBINSTRUC SIFSUB {: errores.add("Se esperaba un salto de línea"); :}
-                | ELSE error SUBINSTRUC {: errores.add("Se esperaba un salto de línea"); :}
-;
-
-DOWHILESUB  ::= DO WHILE CONDICION saltoLinea SUBINSTRUC LOOP | DO saltoLinea SUBINSTRUC LOOP WHILE CONDICION;
-FORSUB      ::= FOR COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT;
->>>>>>> 881caefdada6636574abdf62605ee6e262ab7d24
 
 //Instrucciones de una función
 FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TIPO:t saltoLinea FUNCINSTRUC:f END FUNCTION {:
@@ -538,7 +516,6 @@ SIFFUNC     ::= ELSEIF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s {:
                 | ELSE error SIFFUNC {: errores.add("Se esperaba un salto de línea"); :}
 ;
 
-<<<<<<< HEAD
 FORFUNC     ::= FOR COUNTER:c TO OPARIT:o saltoLinea FUNCINSTRUC:f NEXT{:
                             Nodo node = new Nodo("FOR",parser.cont);
                             parser.cont++;
@@ -549,11 +526,11 @@ FORFUNC     ::= FOR COUNTER:c TO OPARIT:o saltoLinea FUNCINSTRUC:f NEXT{:
                             }
                             RESULT = node;
                 :}
-                | error COUNTER TO OPARIT saltoLinea FUNINSTRUC NEXT {: System.out.println("Se esperaba un FOR"); :}
-                | FOR error TO OPARIT saltoLinea FUNCINSTRUC NEXT {: System.out.println("Error en la asignacion del contador del for"); :}
-                | FOR COUNTER error OPARIT saltoLinea FUNCINSTRUC NEXT {: System.out.println("Se esperaba un TO"); :}
-                | FOR COUNTER TO OPARIT error FUNCINSTRUC NEXT {: System.out.println("Se esperaba un salto de linea"); :}
-                | FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC error {: System.out.println("Se esperaba un NEXT"); :}
+                | error COUNTER TO OPARIT saltoLinea FUNINSTRUC NEXT {: errores.add("Se esperaba un FOR"); :}
+                | FOR error TO OPARIT saltoLinea FUNCINSTRUC NEXT {: errores.add("Error en la asignacion del contador del for"); :}
+                | FOR COUNTER error OPARIT saltoLinea FUNCINSTRUC NEXT {: errores.add("Se esperaba un TO"); :}
+                | FOR COUNTER TO OPARIT error FUNCINSTRUC NEXT {: errores.add("Se esperaba un salto de linea"); :}
+                | FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC error {: errores.add("Se esperaba un NEXT"); :}
 ;
 
 DOWHILEFUNC ::= DO WHILE CONDICION:c saltoLinea FUNCINSTRUC:f LOOP{:
@@ -565,16 +542,12 @@ DOWHILEFUNC ::= DO WHILE CONDICION:c saltoLinea FUNCINSTRUC:f LOOP{:
                             }
                             RESULT = node;
                 :}
-                | error WHILE CONDICION saltoLinea FUNCINSTRUC LOOP {: System.out.println("Se esperaba un DO"); :}
-                | DO error CONDICION saltoLinea FUNCINSTRUC LOOP {: System.out.println("Se esperaba un WHILE"); :}
-                | DO WHILE error saltoLinea FUNCINSTRUC LOOP {: System.out.println("Error en la condicion"); :}
-                | DO WHILE CONDICION error FUNCINSTRUC LOOP {: System.out.println("Se esperaba un salto de linea"); :}
-                | DO WHILE CONDICION saltoLinea FUNCINSTRUC error {: System.out.println("Se esperaba un LOOP"); :}
+                | error WHILE CONDICION saltoLinea FUNCINSTRUC LOOP {: errores.add("Se esperaba un DO"); :}
+                | DO error CONDICION saltoLinea FUNCINSTRUC LOOP {: errores.add("Se esperaba un WHILE"); :}
+                | DO WHILE error saltoLinea FUNCINSTRUC LOOP {: errores.add("Error en la condicion"); :}
+                | DO WHILE CONDICION error FUNCINSTRUC LOOP {: errores.add("Se esperaba un salto de linea"); :}
+                | DO WHILE CONDICION saltoLinea FUNCINSTRUC error {: errores.add("Se esperaba un LOOP"); :}
 ;
-=======
-FORFUNC     ::= FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC NEXT;
-DOWHILEFUNC ::= DO WHILE CONDICION saltoLinea FUNCINSTRUC LOOP | DO saltoLinea FUNCINSTRUC LOOP WHILE CONDICION;
->>>>>>> 881caefdada6636574abdf62605ee6e262ab7d24
 
 RETVAL      ::= RETURN VAL:v {:
                     Nodo node = new Nodo("RETURN",parser.cont);
@@ -591,7 +564,6 @@ VAL         ::= VALASIGN:v {:
                 :};
 
 //Instrucciones del for
-<<<<<<< HEAD
 COUNTER     ::= ASIGNINT:ai {:
                     RESULT=ai;
                 :} 
@@ -605,12 +577,9 @@ COUNTER     ::= ASIGNINT:ai {:
                             node.addHijo(op);
                             RESULT = node;
                 :}
-                         | error AS INTEGERTYPE IGUAL OPARIT {: System.out.println("Se esperaba un identificador"); :}
-                         | identificador error OPARIT {: System.out.println("Error en asignar el tipo"); :}
+                         | error AS INTEGERTYPE IGUAL OPARIT {: errores.add("Se esperaba un identificador"); :}
+                         | identificador error OPARIT {: errores.add("Error en asignar el tipo"); :}
 ;
-=======
-COUNTER     ::= ASIGNINT | identificador AS INTEGERTYPE IGUAL OPARIT;
->>>>>>> 881caefdada6636574abdf62605ee6e262ab7d24
 
 //llamado de funcion o sub procedure
 CALL        ::= identificador:i PARENTESISL PARAMCALL:p PARENTESISR {:

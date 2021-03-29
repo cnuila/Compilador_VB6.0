@@ -8,6 +8,7 @@ package paquetePrincipal;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.StringReader;
+import java.util.ArrayList;
 
 /**
  *
@@ -87,20 +88,41 @@ public class Main extends javax.swing.JFrame {
                     Lexer scanner = new Lexer(new FileReader("/home/cnuila/Documents/Compiladores/Compilador_VB6.0/src/paquetePrincipal/entrada.txt"));
                     parser miParser = new parser(scanner);
                     miParser.parse();
-                    //String texto = "edge [color=blue];0 [label=\"PRIMERO\"];" + miParser.raiz.toString() + "0->1";
-                    //DFS(miParser.raiz);
-                    //miParser.padre.exportarArbol(texto, "AST");
+                    String formato = "edge [color=blue];"+ hacerDFS(miParser.raiz);
+                    System.out.println(formato);
+                    miParser.raiz.exportarArbol(formato, "AST");
                 } catch (Exception e) {
                     System.out.println(e);
                 }
             }
         });
+    }    
+
+    public static String hacerDFS(Nodo node){
+        ArrayList<String> recorrido = new ArrayList<>();
+        DFS(node, recorrido);
+        DFSAristas(node, node.getIdNodo(), recorrido);
+        String formato = "";
+        for (int i = 0; i < recorrido.size();i++){
+            formato+=recorrido.get(i);
+        }
+        return formato;
+    }
+    
+
+    public static void DFS(Nodo node, ArrayList<String> recorrido) {
+        recorrido.add(node.toString());
+        for (int i = 0; i < node.getHijos().size(); i++) {
+            DFS(node.getHijos().get(i),recorrido);
+        }
     }
 
-    public static void DFS(Nodo node) {
-        System.out.println(node.toString());
+    public static void DFSAristas(Nodo node,int padre, ArrayList<String> recorrido) {
+        if(node.getIdNodo() != padre){
+            recorrido.add(padre+"->"+node.getIdNodo()+";");
+        }        
         for (int i = 0; i < node.getHijos().size(); i++) {
-            DFS(node.getHijos().get(i));
+            DFSAristas(node.getHijos().get(i),node.getIdNodo(), recorrido);
         }
     }
 

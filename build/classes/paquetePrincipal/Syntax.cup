@@ -1,9 +1,9 @@
-package paquetePrincipal;
+
 import java_cup.runtime.Symbol;
 
 parser code
 {:
-    public static Nodo raiz;    
+    public Nodo raiz;    
     public int cont = 0;
 
     public void syntax_error(Symbol s){
@@ -13,10 +13,12 @@ parser code
     //public void unrecovered_syntax_error
 :}
 
-terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, LLAMADOSTRUC, identificador, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, INTEGER, STRINGTYPE, OPREL, OPADICION, OPMULTI, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, CONTINUE, EXIT, FOR, TO, NEXT, STEP, WHILE, DO, UNTIL, LOOP, RETURN, CONCATSTRING, STRING, FUNCTION, READ, WRITE;
+terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, LLAMADOSTRUC, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, OPREL, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
+terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI;
 
-nonterminal MDLINSTRUC, MDLINP, SUBPROCE,STRUCTUREDECLA, ASIGNSTRUC, SUBINSTRUC, SIFSUB, PARAMS, FUNC, FUNCINSTRUC, SIFFUNC, RETVAL, VAL, CALL, VARCALL, PARAMCALL, CONDICION, CONDICIONP, VALCOND, OPCONDICION, TIPO, TIPOIGUAL, CANTVARS, VARS, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, T, DECLARACION, COUNTER, OPARIT, OP, OPP, VALASIGN, VALINT, ASIGN, ASIGNINT, UNIRSTRNG, VALUNIRSTR, OPASING, ASIGNOTRO, WRCONSOLE, VALWR, IFSUB, IFFUNC;
-nonterminal Nodo S;
+nonterminal S, MDLINP, SUBPROCE,STRUCTUREDECLA, ASIGNSTRUC, SUBINSTRUC, SIFSUB, PARAMS, FUNC, FUNCINSTRUC, SIFFUNC, RETVAL, CONDICION, CONDICIONP, VALCOND, OPCONDICION, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER, VALASIGN, VALINT, ASIGN, ASIGNINT, VALUNIRSTR, OPASING, ASIGNOTRO, IFSUB, IFFUNC;
+nonterminal Nodo MDLINSTRUC, WRCONSOLE, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT;
+nonterminal String VALWR, UNIRSTRNG, TIPO;
 
 precedence left IGUAL;
 precedence left OPREL;
@@ -25,15 +27,29 @@ precedence left OPMULTI;
 
 start with S;
 
-S      ::= MODULE identificador saltoLinea MDLINSTRUC END MODULE {:System.out.println("Listo Module");:}
+S      ::= MODULE identificador:id saltoLinea MDLINSTRUC:m END MODULE {:
+            System.out.println("Listo Module");
+            Nodo node = new Nodo("INICIO",parser.cont);
+            parser.cont++;
+            node.addHijo(new Nodo("MODULE", parser.cont));
+            parser.cont++;
+            node.addHijo(new Nodo(id, parser.cont));
+            parser.cont++;
+            node.addHijo(m);
+            parser.raiz = node;            
+        :}
             | error identificador saltoLinea MDLINSTRUC END MODULE {: System.out.println("Se esparaba un MODULE"); :}
             | MODULE error saltoLinea MDLINSTRUC END MODULE {: System.out.println("Se esperaba un identificador para el module"); :}
             | MODULE identificador error MDLINSTRUC END MODULE {: System.out.println("Se esperaba un salto de línea en el encabezado del module"); :}
             | MODULE identificador saltoLinea MDLINSTRUC error MODULE {: System.out.println("Se esperaba un END"); :}
-            | MODULE identificador saltoLinea MDLINSTRUC END error {: System.out.println("Se esperaba un MODULE al final del archivo"); :}; 
+            | MODULE identificador saltoLinea MDLINSTRUC END error {: System.out.println("Se esperaba un MODULE al final del archivo"); :}
+; 
 
 //Instrucciones dentro del Module
-MDLINSTRUC  ::= DECLARACION MDLINSTRUC | saltoLinea MDLINSTRUC | FUNC MDLINSTRUC | SUBPROCE MDLINP| STRUCTUREDECLA MDLINSTRUC;
+MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC {:                    
+                    RESULT=d;
+                :}
+                | saltoLinea MDLINSTRUC | FUNC MDLINSTRUC | SUBPROCE MDLINP| STRUCTUREDECLA MDLINSTRUC;
 MDLINP      ::= DECLARACION MDLINP | saltoLinea MDLINP | SUBPROCE MDLINP | FUNC MDLINP | STRUCTUREDECLA MDLINP | saltoLinea;
 
 //Intrucciones de una Structure
@@ -104,19 +120,47 @@ SIFFUNC     ::= ELSEIF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC
 
 FORFUNC     ::= FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC NEXT;
 DOWHILEFUNC ::= DO WHILE CONDICION saltoLinea FUNCINSTRUC LOOP | DO saltoLinea FUNCINSTRUC LOOP WHILE CONDICION;
+
 RETVAL      ::= RETURN VAL;
-VAL         ::= VALASIGN | VALINT;
+
+VAL         ::= VALASIGN:v {:
+                    RESULT=v;
+                :} 
+                | VALINT:v {:
+                    RESULT=v;
+                :} ;
 
 //Instrucciones del for
 COUNTER     ::= ASIGNINT | identificador AS INTEGERTYPE IGUAL OPARIT;
 
 //llamado de funcion o sub procedure
-CALL        ::= identificador PARENTESISL PARAMCALL PARENTESISR
+CALL        ::= identificador:i PARENTESISL PARAMCALL:p PARENTESISR {:
+                    Nodo node = new Nodo("FUNCTION CALL",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(i,parser.cont));
+                    parser.cont++;
+                    node.addHijo(p);
+                    RESULT = node;
+                :}
                 | error PARENTESISL PARAMCALL PARENTESISR {: System.out.println("Se esperaba identificador"); :}
 ;                
 
-PARAMCALL   ::= VARCALL | ;
-VARCALL     ::= VARCALL COMA VAL | VAL | VARCALL error {: System.out.println("Error en parametros"); :};
+PARAMCALL   ::= VARCALL:v {:
+                    RESULT=v;
+                :} 
+                | ;
+
+VARCALL     ::= VARCALL:v COMA VAL:val {:
+                    Nodo node = new Nodo("VARCALL",parser.cont);
+                    parser.cont++;
+                    node.addHijo(v);
+                    node.addHijo(val);
+                    RESULT = node;
+                :}
+                | VAL:v {:
+                    RESULT = v;
+                :}
+                | VARCALL error {: System.out.println("Error en parametros"); :};
 
 //gramática condiciones
 CONDICION   ::= CONDICION AND CONDICIONP 
@@ -139,7 +183,29 @@ ASIGNOTRO   ::= identificador IGUAL VALASIGN;
 
 ASIGNSTRUC  ::= LLAMADOSTRUC IGUAL VALASIGN | LLAMADOSTRUC OPASING VALINT;
 
-VALASIGN    ::= STRING | TRUE | FALSE | UNIRSTRNG | READ;
+VALASIGN    ::= STRING:str {:
+                    Nodo node = new Nodo(str,parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :} 
+                | TRUE {:
+                    Nodo node = new Nodo("TRUE",parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :} 
+                | FALSE {:
+                    Nodo node = new Nodo("FALSE",parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :} 
+                | UNIRSTRNG:ustr {:
+                    Nodo node = new Nodo(ustr,parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :} 
+                | READ:r {:
+                    RESULT = r;
+                :} ;
 
 UNIRSTRNG   ::= VALUNIRSTR CONCATSTRING UNIRSTRNG | VALUNIRSTR CONCATSTRING VALUNIRSTR;
 VALUNIRSTR  ::= STRING | identificador | error {: System.out.println("Se esperaba un valor String"); :};
@@ -153,33 +219,200 @@ OPASING     ::= IGUAL | OPMULTI IGUAL | OPADICION IGUAL;
 VALINT      ::= OPARIT;
 
 //gramática operaciones aritméticas
-OPARIT      ::= OPARIT OPADICION OP | OP;
-OP          ::= OP OPMULTI OPP | OPP;
-OPP         ::= INTEGER | identificador | CALL | PARENTESISL OPARIT PARENTESISR | error {: System.out.println("Error en operación con Integer"); :};
+OPARIT      ::= OPARIT:o OPADICION:oPa OP:op {:                     
+                    Nodo node = new Nodo(oPa,parser.cont); 
+                    parser.cont++;
+                    node.addHijo(o);
+                    node.addHijo(op);
+                    RESULT = node;                  
+                :} 
+                | OP:o {:                     
+                    RESULT = o;                    
+                :} 
+;
+
+OP          ::= OP:o OPMULTI:oM OPP:op {: 
+                    Nodo node = new Nodo(oM,parser.cont); 
+                    parser.cont++;
+                    node.addHijo(o);
+                    node.addHijo(op);
+                    RESULT = node;                    
+                :} 
+                | OPP:o {:                     
+                    RESULT = o;                    
+                :} 
+;
+
+OPP         ::= INTEGER:i {: 
+                    Nodo node = new Nodo(i,parser.cont); 
+                    parser.cont++;
+                    RESULT = node;                    
+                :} 
+                | identificador:id {: 
+                    Nodo node = new Nodo(id,parser.cont); 
+                    parser.cont++;
+                    RESULT = node;                    
+                :} 
+                | CALL:c {: 
+                    RESULT = c;                    
+                :}  
+                | PARENTESISL OPARIT:o PARENTESISR {: 
+                    RESULT = o;                    
+                :} 
+                | error {: System.out.println("Error en operación con Integer"); :}
+;
 
 //gramática declaración de variables
-DECLARACION ::= DIM T | DIM error {: System.out.println("Error en declaración"); :};
-T           ::= identificador AS TIPOIGUAL 
-                | identificador AS TIPO COMA VARS 
-                | identificador COMA CANTVARS AS TIPO COMA VARS 
-                | identificador COMA CANTVARS AS TIPO  
-                | identificador AS TIPO
+DECLARACION ::= DIM T:t {:
+                    RESULT=t;
+                :} 
+                | DIM error {: System.out.println("Error en declaración"); :}
+;
+
+T           ::= identificador:id AS TIPOIGUAL:t {:
+                    Nodo node = new Nodo("DECLARACION",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(t);
+                    RESULT = node;
+                :}
+                | identificador:id AS TIPO:t COMA VARS:v {:
+                    Nodo node = new Nodo("DECLARACION",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+                    node.addHijo(v);
+                    RESULT = node;
+                :}
+                | identificador:id COMA CANTVARS:c AS TIPO:t COMA VARS:v {:
+                    Nodo node = new Nodo("DECLARACION",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(c);
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+                    node.addHijo(v);
+                    RESULT = node;
+                :}
+                | identificador:id COMA CANTVARS:c AS TIPO:t {:
+                    Nodo node = new Nodo("DECLARACION",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(c);
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+                    RESULT = node;
+                :}
+                | identificador:id AS TIPO:t {:
+                    Nodo node = new Nodo("DECLARACION",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+                    RESULT = node;
+                :}
                 | identificador AS identificador IGUAL NEW CALL
 ;
-VARS        ::= CANTVARS AS TIPO COMA VARS 
-                | CANTVARS AS TIPO 
+
+VARS        ::= CANTVARS:c AS TIPO:t COMA VARS:v {:
+                    Nodo node = new Nodo("VARS", parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+                    node.addHijo(v);
+                    RESULT = node;
+                :}
+                | CANTVARS:c AS TIPO:t {:
+                    Nodo node = new Nodo("VARS", parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+                    RESULT = node;
+                :}
                 | CANTVARS error {: System.out.println("Error en variables"); :}
 ;
-CANTVARS    ::= CANTVARS COMA identificador | identificador;
-TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT | STRINGTYPE IGUAL STRING | BOOLEANTYPE IGUAL TRUE | BOOLEANTYPE IGUAL FALSE | STRINGTYPE IGUAL UNIRSTRNG| identificador;
-TIPO        ::= INTEGERTYPE | STRINGTYPE | BOOLEANTYPE;
+
+CANTVARS    ::= CANTVARS:c COMA identificador:id {:
+                    Nodo node = new Nodo("VARS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    RESULT=node;  
+                :}
+                | identificador:id {:
+                    Nodo node = new Nodo(id,parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :}
+;
+
+TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
+                    Nodo node = new Nodo("=",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo("INTEGER",parser.cont));
+                    parser.cont++;
+                    node.addHijo(o);
+                    RESULT=node;                    
+                :}
+                | STRINGTYPE IGUAL STRING:str {:
+                    Nodo node = new Nodo("=",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo("STRING",parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo(str,parser.cont));
+                    parser.cont++;
+                    RESULT=node; 
+                :}
+                | BOOLEANTYPE IGUAL TRUE {:
+                    Nodo node = new Nodo("=",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo("BOOLEAN",parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo("TRUE",parser.cont));
+                    parser.cont++;
+                    RESULT=node;  
+                :}
+                | BOOLEANTYPE IGUAL FALSE {:
+                    Nodo node = new Nodo("=",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo("BOOLEAN",parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo("FALSE",parser.cont));
+                    parser.cont++;
+                    RESULT=node;
+                :}
+                | STRINGTYPE IGUAL UNIRSTRNG:ustr {:
+                    Nodo node = new Nodo("=",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo("BOOLEAN",parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo(ustr,parser.cont));
+                    parser.cont++;
+                    RESULT=node;
+                :}
+;
+
+TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRING"; :} | BOOLEANTYPE {: RESULT="BOOLEAN"; :} ;
 
 //gramática escribir en consola
-WRCONSOLE   ::= WRITE PARENTESISL VALWR PARENTESISR
+WRCONSOLE   ::= WRITE PARENTESISL VALWR:v PARENTESISR {:
+                    Nodo node = new Nodo("console.write",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(v,parser.cont));
+                    parser.cont++;
+                    RESULT=node;
+                :}
                 | WRITE error VALWR PARENTESISR {: System.out.println("Error en console.write"); :}       
                 
 ;
-VALWR       ::= identificador | STRING | UNIRSTRNG | error {: System.out.println("Se esperaba un String"); :};
 
-//restantes
-SUBINSTRUC  ::= CONTINUE FOR TO NEXT STEP STRUCTURE WHILE DO UNTIL LOOP;
+VALWR       ::= identificador:id {: RESULT=id; :} | STRING:str {: RESULT=str; :} | UNIRSTRNG:ustr {: RESULT=ustr; :} | error {: System.out.println("Se esperaba un String"); :};

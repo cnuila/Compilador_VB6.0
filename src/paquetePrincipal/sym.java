@@ -13,15 +13,15 @@ public class sym {
   public static final int PARENTESISL = 30;
   public static final int INTEGER = 19;
   public static final int CONTINUE = 32;
-  public static final int identificador = 10;
+  public static final int identificador = 5;
   public static final int FOR = 34;
   public static final int WRITE = 47;
-  public static final int LLAMADOSTRUC = 9;
+  public static final int LLAMADOSTRUC = 10;
   public static final int NOT = 26;
   public static final int AND = 24;
   public static final int OPMULTI = 23;
-  public static final int ELSEIF = 6;
-  public static final int IGUAL = 7;
+  public static final int ELSEIF = 7;
+  public static final int IGUAL = 8;
   public static final int OR = 25;
   public static final int UNTIL = 40;
   public static final int OPREL = 21;
@@ -46,8 +46,8 @@ public class sym {
   public static final int WHILE = 38;
   public static final int STRINGTYPE = 20;
   public static final int saltoLinea = 11;
-  public static final int THEN = 5;
-  public static final int STRUCTURE = 8;
+  public static final int THEN = 6;
+  public static final int STRUCTURE = 9;
   public static final int END = 4;
   public static final int STRING = 44;
   public static final int FALSE = 17;
@@ -62,12 +62,12 @@ public class sym {
   "IF",
   "ELSE",
   "END",
+  "identificador",
   "THEN",
   "ELSEIF",
   "IGUAL",
   "STRUCTURE",
   "LLAMADOSTRUC",
-  "identificador",
   "saltoLinea",
   "DIM",
   "COMA",

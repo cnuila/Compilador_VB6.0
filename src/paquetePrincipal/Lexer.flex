@@ -65,7 +65,8 @@ RETURN = return
 CONCATSTRING = "&"
 COMA = ,
 FUNCTION = function
-
+LLAMADOSTRUC = {identificador}"."{identificador}
+NEW = new 
 %%
 <YYINITIAL> {
     {inicioComentario}      {yybegin(COMENTARIO);}
@@ -98,6 +99,7 @@ FUNCTION = function
     {NOT}                   {return new Symbol(sym.NOT,yyline,yycolumn,yytext());}
     {FOR}                   {return new Symbol(sym.FOR,yyline,yycolumn,yytext());}
     {TO}                    {return new Symbol(sym.TO,yyline,yycolumn,yytext());}
+    {NEW}                   {return new Symbol(sym.NEW,yyline,yycolumn,yytext());}
     {NEXT}                  {return new Symbol(sym.NEXT,yyline,yycolumn,yytext());}
     {STEP}                  {return new Symbol(sym.STEP,yyline,yycolumn,yytext());}
     {WHILE}                 {return new Symbol(sym.WHILE,yyline,yycolumn,yytext());}
@@ -110,7 +112,8 @@ FUNCTION = function
     {SUB}                   {return new Symbol(sym.SUB,yyline,yycolumn,yytext());}
     {STRUCTURE}             {return new Symbol(sym.STRUCTURE,yyline,yycolumn,yytext());}
     {PARENTESISL}           {return new Symbol(sym.PARENTESISL,yyline,yycolumn,yytext());}
-    {PARENTESISR}           {return new Symbol(sym.PARENTESISR,yyline,yycolumn,yytext());}     
+    {PARENTESISR}           {return new Symbol(sym.PARENTESISR,yyline,yycolumn,yytext());} 
+    {LLAMADOSTRUC}          {return new Symbol(sym.LLAMADOSTRUC,yyline,yycolumn,yytext());}    
     {identificador}         {return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
     {saltoLinea}            {return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
     {espacio}               {}

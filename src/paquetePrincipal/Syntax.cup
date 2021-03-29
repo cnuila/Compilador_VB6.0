@@ -100,7 +100,12 @@ MDLINP      ::= DECLARACION:d MDLINP:m {:
                 | saltoLinea;
 
 //Intrucciones de una Structure
-STRUCTUREDECLA   ::= STRUCTURE identificador saltoLinea DECLARACION END STRUCTURE;
+STRUCTUREDECLA   ::= STRUCTURE identificador saltoLinea DECLARACION END STRUCTURE
+                     | STRUCTURE error saltoLinea DECLARACION END STRUCTURE {: System.out.println("Se esperaba un identificador para la structure"); :}
+                     | STRUCTURE identificador error DECLARACION END STRUCTURE {: System.out.println("Se esperaba un salto de linea"); :}
+                     | STRUCTURE identificador saltoLinea error END STRUCTURE {: System.out.println("error en la declaracion del structure"); :}
+                     | STRUCTURE identificador saltoLinea DECLARACION END error {: System.out.println("Se esperaba un identificador para la structure"); :}
+;
 
 //Instrucciones de un subprocedure
 SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea SUBINSTRUC:s END SUB {:
@@ -230,8 +235,21 @@ SIFSUB      ::= ELSEIF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 {:
                 | ELSE error SUBINSTRUC {: System.out.println("Se esperaba un salto de línea"); :}
 ;
 
-DOWHILESUB  ::= DO WHILE CONDICION saltoLinea SUBINSTRUC LOOP | DO saltoLinea SUBINSTRUC LOOP WHILE CONDICION;
-FORSUB      ::= FOR COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT;
+DOWHILESUB  ::= DO WHILE CONDICION saltoLinea SUBINSTRUC LOOP | DO saltoLinea SUBINSTRUC LOOP WHILE CONDICION
+                | error WHILE CONDICION saltoLinea SUBINSTRUC LOOP {: System.out.println("Se esperaba un DO"); :}
+                | DO error CONDICION saltoLinea SUBINSTRUC LOOP {: System.out.println("Se esperaba un WHILE"); :}
+                | DO WHILE error saltoLinea SUBINSTRUC LOOP {: System.out.println("Error en la condicion"); :}
+                | DO WHILE CONDICION error SUBINSTRUC LOOP {: System.out.println("Se esperaba un salto de linea"); :}
+                | DO WHILE CONDICION saltoLinea SUBINSTRUC error {: System.out.println("Se esperaba un LOOP"); :}
+;
+
+FORSUB      ::= FOR COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT
+                | error COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Se esperaba un FOR"); :}
+                | FOR error TO OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Error en la asignacion del contador del for"); :}
+                | FOR COUNTER error OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Se esperaba un TO"); :}
+                | FOR COUNTER TO OPARIT error SUBINSTRUC NEXT {: System.out.println("Se esperaba un salto de linea"); :}
+                | FOR COUNTER TO OPARIT saltoLinea SUBINSTRUC error {: System.out.println("Se esperaba un NEXT"); :}
+;
 
 //Instrucciones de una función
 FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TIPO:t saltoLinea FUNCINSTRUC:f END FUNCTION {:
@@ -379,8 +397,21 @@ SIFFUNC     ::= ELSEIF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s {:
                 | ELSE error SIFFUNC {: System.out.println("Se esperaba un salto de línea"); :}
 ;
 
-FORFUNC     ::= FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC NEXT;
-DOWHILEFUNC ::= DO WHILE CONDICION saltoLinea FUNCINSTRUC LOOP | DO saltoLinea FUNCINSTRUC LOOP WHILE CONDICION;
+FORFUNC     ::= FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC NEXT
+                | error COUNTER TO OPARIT saltoLinea FUNINSTRUC NEXT {: System.out.println("Se esperaba un FOR"); :}
+                | FOR error TO OPARIT saltoLinea FUNCINSTRUC NEXT {: System.out.println("Error en la asignacion del contador del for"); :}
+                | FOR COUNTER error OPARIT saltoLinea FUNCINSTRUC NEXT {: System.out.println("Se esperaba un TO"); :}
+                | FOR COUNTER TO OPARIT error FUNCINSTRUC NEXT {: System.out.println("Se esperaba un salto de linea"); :}
+                | FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC error {: System.out.println("Se esperaba un NEXT"); :}
+;
+
+DOWHILEFUNC ::= DO WHILE CONDICION saltoLinea FUNCINSTRUC LOOP | DO saltoLinea FUNCINSTRUC LOOP WHILE CONDICION
+                | error WHILE CONDICION saltoLinea FUNCINSTRUC LOOP {: System.out.println("Se esperaba un DO"); :}
+                | DO error CONDICION saltoLinea FUNCINSTRUC LOOP {: System.out.println("Se esperaba un WHILE"); :}
+                | DO WHILE error saltoLinea FUNCINSTRUC LOOP {: System.out.println("Error en la condicion"); :}
+                | DO WHILE CONDICION error FUNCINSTRUC LOOP {: System.out.println("Se esperaba un salto de linea"); :}
+                | DO WHILE CONDICION saltoLinea FUNCINSTRUC error {: System.out.println("Se esperaba un LOOP"); :}
+;
 
 RETVAL      ::= RETURN VAL:v {:
                     Nodo node = new Nodo("RETURN",parser.cont);
@@ -397,7 +428,10 @@ VAL         ::= VALASIGN:v {:
                 :} ;
 
 //Instrucciones del for
-COUNTER     ::= ASIGNINT | identificador AS INTEGERTYPE IGUAL OPARIT;
+COUNTER     ::= ASIGNINT | identificador AS INTEGERTYPE IGUAL OPARIT
+                         | error AS INTEGERTYPE IGUAL OPARIT {: System.out.println("Se esperaba un identificador"); :}
+                         | identificador error OPARIT {: System.out.println("Error en asignar el tipo"); :}
+;
 
 //llamado de funcion o sub procedure
 CALL        ::= identificador:i PARENTESISL PARAMCALL:p PARENTESISR {:

@@ -83,18 +83,25 @@ public class Main extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Main().setVisible(true);
-                try {        
+                try {
                     Lexer scanner = new Lexer(new FileReader("/home/cnuila/Documents/Compiladores/Compilador_VB6.0/src/paquetePrincipal/entrada.txt"));
                     parser miParser = new parser(scanner);
                     miParser.parse();
-                    System.out.println(miParser.padre.toString());
-                    String texto = "edge [color=blue];0 [label=\"PRIMERO\"];"+miParser.padre.toString()+"0->1";
-                    miParser.padre.exportarArbol(texto, "AST");
+                    //String texto = "edge [color=blue];0 [label=\"PRIMERO\"];" + miParser.raiz.toString() + "0->1";
+                    //DFS(miParser.raiz);
+                    //miParser.padre.exportarArbol(texto, "AST");
                 } catch (Exception e) {
                     System.out.println(e);
                 }
             }
         });
+    }
+
+    public static void DFS(Nodo node) {
+        System.out.println(node.toString());
+        for (int i = 0; i < node.getHijos().size(); i++) {
+            DFS(node.getHijos().get(i));
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

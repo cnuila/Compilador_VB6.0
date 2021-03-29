@@ -40,13 +40,13 @@ public class Nodo {
         //File out = new File(fileName + "." + type);
         gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), type, repesentationType), out);
     }
-
+    
     @Override
     public String toString() {
         return idNodo + " [label=\""+ etiqueta + "\"];";
     }    
     
-    public void addHijos(Nodo hijo){
+    public void addHijo(Nodo hijo){
         this.hijos.add(hijo);
     }
 

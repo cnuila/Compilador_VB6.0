@@ -84,7 +84,7 @@ public class Main extends javax.swing.JFrame {
             public void run() {
                 new Main().setVisible(true);
                 try {        
-                    Lexer scanner = new Lexer(new FileReader("/home/cnuila/Documents/Compiladores/Compilador_VB6.0/src/paquetePrincipal/entrada.txt"));
+                    Lexer scanner = new Lexer(new FileReader("C:\\Users\\Danie\\OneDrive\\Escritorio\\entrada3"));
                     parser miParser = new parser(scanner);
                     miParser.parse();
                     System.out.println(miParser.padre.toString());

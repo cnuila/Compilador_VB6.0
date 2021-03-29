@@ -13,12 +13,12 @@ parser code
     //public void unrecovered_syntax_error
 :}
 
-terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, LLAMADOSTRUC, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, OPREL, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
-terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI;
+terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, LLAMADOSTRUC, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
+terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL;
 
-nonterminal S, MDLINP, SUBPROCE,STRUCTUREDECLA, ASIGNSTRUC, SUBINSTRUC, SIFSUB, FUNC, FUNCINSTRUC, SIFFUNC, RETVAL, CONDICION, CONDICIONP, OPCONDICION, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER, IFSUB, IFFUNC;
-nonterminal Nodo MDLINSTRUC, WRCONSOLE, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO,PARAMS,VALCOND;
-nonterminal String VALWR, UNIRSTRNG, VALUNIRSTR, TIPO;
+nonterminal S,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER;
+nonterminal Nodo MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, PARAMS, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC;
+nonterminal String VALWR, UNIRSTRNG, VALUNIRSTR, TIPO, OPCONDICION;
 
 precedence left IGUAL;
 precedence left OPREL;
@@ -46,48 +46,209 @@ S      ::= MODULE identificador:id saltoLinea MDLINSTRUC:m END MODULE {:
 ; 
 
 //Instrucciones dentro del Module
-MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC {:                    
-                    RESULT=d;
+MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:                    
+                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(d);
+                    node.addHijo(md);
+                    RESULT=node;
                 :}
-                | saltoLinea MDLINSTRUC | FUNC MDLINSTRUC | SUBPROCE MDLINP| STRUCTUREDECLA MDLINSTRUC;
-MDLINP      ::= DECLARACION MDLINP | saltoLinea MDLINP | SUBPROCE MDLINP | FUNC MDLINP | STRUCTUREDECLA MDLINP | saltoLinea;
+                | saltoLinea MDLINSTRUC:md {:
+                    RESULT = md;
+                :}
+                | FUNC:f MDLINSTRUC:md {:                    
+                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(f);
+                    node.addHijo(md);
+                    RESULT=node;
+                :}
+                | SUBPROCE:s MDLINP:md {:                    
+                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(s);
+                    node.addHijo(md);
+                    RESULT=node;
+                :}
+                | STRUCTUREDECLA MDLINSTRUC;
+
+MDLINP      ::= DECLARACION:d MDLINP:m {:
+                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(d);
+                    node.addHijo(m);
+                    RESULT=node;
+                :}
+                | saltoLinea MDLINP:m {:
+                    RESULT = m;
+                :}
+                | SUBPROCE:s MDLINP:m {:
+                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(s);
+                    node.addHijo(m);
+                    RESULT=node;
+                :}
+                | FUNC:f MDLINP:m {:
+                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(f);
+                    node.addHijo(m);
+                    RESULT=node;
+                :}
+                | STRUCTUREDECLA MDLINP 
+                | saltoLinea;
 
 //Intrucciones de una Structure
 STRUCTUREDECLA   ::= STRUCTURE identificador saltoLinea DECLARACION END STRUCTURE;
 
 //Instrucciones de un subprocedure
-SUBPROCE    ::= SUB identificador PARENTESISL PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB
+SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea SUBINSTRUC:s END SUB {:
+                        Nodo node = new Nodo("SUB",parser.cont);
+                        parser.cont++;
+                        node.addHijo(new Nodo(id,parser.cont));
+                        parser.cont++;
+                        if (p != null){
+                            node.addHijo(p);
+                        }                        
+                        node.addHijo(s);
+                        RESULT=node;
+                :}
                 | SUB error PARENTESISL PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: System.out.println("Se esperaba un identificador para el sub"); :}
                 | SUB identificador error PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: System.out.println("Se esperaba un parentesis izquierdo en el encabezado del sub"); :}
                 | SUB identificador PARENTESISL PARAMS error saltoLinea SUBINSTRUC END SUB {: System.out.println("Se esperaba un parentesis derecho en el encabezado del sub"); :}
                 | SUB identificador PARENTESISL PARAMS PARENTESISR error SUBINSTRUC END SUB {: System.out.println("Se esperaba un salto de linea en el encabezado del sub"); :}
 ;
 
-SUBINSTRUC  ::= DECLARACION SUBINSTRUC | saltoLinea SUBINSTRUC | EXIT SUB SUBINSTRUC | ASIGN SUBINSTRUC | CALL SUBINSTRUC | WRCONSOLE SUBINSTRUC| IFSUB SUBINSTRUC| FORSUB SUBINSTRUC| DOWHILESUB SUBINSTRUC
+SUBINSTRUC  ::= DECLARACION:d SUBINSTRUC:s {:
+                    Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(d);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                    
+                    RESULT = node;
+                :} 
+                | saltoLinea SUBINSTRUC:s {:
+                    if (s != null){
+                        RESULT=s;
+                    }                    
+                :} 
+                | EXIT SUB SUBINSTRUC:s {: 
+                    Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo("EXIT SUB",parser.cont));
+                    parser.cont++;
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    RESULT = node;
+                :} 
+                | ASIGN:a SUBINSTRUC:s {: 
+                    Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(a);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    RESULT = node;
+                :}
+                | CALL:c SUBINSTRUC:s {: 
+                    Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    RESULT = node;
+                :}
+                | WRCONSOLE:w SUBINSTRUC:s {: 
+                    Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(w);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    RESULT = node;
+                :}
+                | IFSUB:i SUBINSTRUC:s {: 
+                    Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(i);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    RESULT = node;
+                :}
+                | FORSUB SUBINSTRUC| DOWHILESUB SUBINSTRUC
                 | error SUBINSTRUC {: System.out.println("Error desconocido"); :}
                 | error SUB SUBINSTRUC {: System.out.println("Se esperaba un EXIT o END"); :}                 
                 | ;
 
-IFSUB       ::= IF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB END IF
+IFSUB       ::= IF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 END IF {:
+                    Nodo node = new Nodo("IF",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    if (s2 != null){
+                        node.addHijo(s2);   
+                    } 
+                    RESULT = node;
+                :}
                 | IF error THEN saltoLinea SUBINSTRUC SIFSUB END IF {: System.out.println("Error en codición del if"); :}
                 | IF CONDICION error saltoLinea SUBINSTRUC SIFSUB END IF {: System.out.println("Se esperaba un THEN"); :}
                 | IF CONDICION THEN error SUBINSTRUC SIFSUB END IF {: System.out.println("Se esperaba un salto de linea"); :}
                 | IF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB END error {: System.out.println("Se esperaba un IF"); :}
 ;
 
-SIFSUB      ::= ELSEIF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB 
-                | ELSE saltoLinea SUBINSTRUC 
+SIFSUB      ::= ELSEIF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 {:
+                    Nodo node = new Nodo("ELSEIF",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    if (s2 != null){
+                        node.addHijo(s2);   
+                    }                   
+                    RESULT = node;
+                :}
+                | ELSE saltoLinea SUBINSTRUC:s {:
+                    Nodo node = new Nodo("ELSE",parser.cont);
+                    parser.cont++;
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    RESULT = node;
+                :} 
                 |
                 | ELSEIF error THEN saltoLinea SUBINSTRUC SIFSUB {: System.out.println("Error en la condición"); :}
                 | ELSEIF CONDICION error saltoLinea SUBINSTRUC SIFSUB {: System.out.println("Se esperaba un THEN"); :}
                 | ELSEIF CONDICION THEN error SUBINSTRUC SIFSUB {: System.out.println("Se esperaba un salto de línea"); :}
                 | ELSE error SUBINSTRUC {: System.out.println("Se esperaba un salto de línea"); :}
 ;
+
 DOWHILESUB  ::= DO WHILE CONDICION saltoLinea SUBINSTRUC LOOP | DO saltoLinea SUBINSTRUC LOOP WHILE CONDICION;
 FORSUB      ::= FOR COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT;
 
 //Instrucciones de una función
-FUNC        ::= FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION
+FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TIPO:t saltoLinea FUNCINSTRUC:f END FUNCTION {:
+                        Nodo node = new Nodo("FUNCTION",parser.cont);
+                        parser.cont++;
+                        node.addHijo(new Nodo(id,parser.cont));
+                        parser.cont++;
+                        if (p != null){
+                            node.addHijo(p);
+                        }                        
+                        node.addHijo(new Nodo(t,parser.cont));
+                        parser.cont++;
+                        if (f != null){
+                            node.addHijo(f);
+                        }                        
+                        RESULT=node;
+                :}
                 | FUNCTION error PARENTESISL PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un identificador para la función"); :}
                 | FUNCTION identificador error PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un parentesis izquierdo en el encabezado de la función"); :}
                 | FUNCTION identificador PARENTESISL PARAMS error AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un parentesis derecho en el encabezado de la función"); :}
@@ -96,21 +257,121 @@ FUNC        ::= FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS TIPO sa
                 | FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS TIPO error FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un salto de línea en el encabezado de la función"); :}
 ;
 
-FUNCINSTRUC ::= DECLARACION FUNCINSTRUC | saltoLinea FUNCINSTRUC | EXIT FUNCTION FUNCINSTRUC | ASIGN FUNCINSTRUC | RETVAL FUNCINSTRUC | CALL FUNCINSTRUC | WRCONSOLE FUNCINSTRUC | IFFUNC FUNCINSTRUC| FORFUNC FUNCINSTRUC | DOWHILEFUNC FUNCINSTRUC 
+FUNCINSTRUC ::= DECLARACION:d FUNCINSTRUC:f {:
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(d);
+                    if (f != null){
+                        node.addHijo(f);
+                    }                   
+                    RESULT = node;
+                :} 
+                | saltoLinea FUNCINSTRUC:f {:
+                    if (f != null){
+                        RESULT=f;
+                    }
+                    
+                :} 
+                | EXIT FUNCTION FUNCINSTRUC:f {: 
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo("EXIT FUNCTION",parser.cont));
+                    parser.cont++;
+                    if (f != null){
+                        node.addHijo(f);
+                    }                    
+                    RESULT = node;
+                :}
+                | ASIGN:a FUNCINSTRUC:f {: 
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(a);
+                    if (f != null){
+                        node.addHijo(f);
+                    }                    
+                    RESULT = node;
+                :}
+                | RETVAL:r FUNCINSTRUC:f {: 
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(r);
+                    if (f != null){
+                        node.addHijo(f);
+                    }                    
+                    RESULT = node;
+                :}
+                | CALL:c FUNCINSTRUC:f {: 
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    if (f != null){
+                        node.addHijo(f);
+                    }                    
+                    RESULT = node;
+                :}
+                | WRCONSOLE:w FUNCINSTRUC:f {: 
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(w);
+                    if (f != null){
+                        node.addHijo(f);
+                    }                    
+                    RESULT = node;
+                :}
+                | IFFUNC:i FUNCINSTRUC:f {: 
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(i);
+                    if (f != null){
+                        node.addHijo(f);
+                    }                    
+                    RESULT = node;
+                :}
+                | FORFUNC FUNCINSTRUC | DOWHILEFUNC FUNCINSTRUC 
                 | 
                 | error FUNC FUNCINSTRUC {: System.out.println("Se esperaba un EXIT o END"); :} 
                 | error FUNCINSTRUC {: System.out.println("Error desconocido"); :}       
 ;
 
-IFFUNC      ::= IF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC END IF
+IFFUNC      ::= IF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s END IF{:
+                    Nodo node = new Nodo("IF",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    if (f != null){
+                        node.addHijo(f);
+                    }
+                    if (s != null){
+                        node.addHijo(s);
+                    }                    
+                    RESULT = node;
+                :}
                 | IF error THEN saltoLinea FUNCINSTRUC SIFFUNC END IF {: System.out.println("Error en codición del if"); :}
                 | IF CONDICION error saltoLinea FUNCINSTRUC SIFFUNC END IF {: System.out.println("Se esperaba un THEN"); :}
                 | IF CONDICION THEN error FUNCINSTRUC SIFFUNC END IF {: System.out.println("Se esperaba un salto de linea"); :}
                 | IF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC END error {: System.out.println("Se esperaba un IF"); :} 
 ;        
 
-SIFFUNC     ::= ELSEIF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC 
-                | ELSE saltoLinea SIFFUNC 
+SIFFUNC     ::= ELSEIF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s {:
+                    Nodo node = new Nodo("ELSEIF",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    if (f != null){
+                        node.addHijo(f);
+                    }
+                    if (s != null){
+                        node.addHijo(s);
+                    }                    
+                    RESULT = node;
+                :}
+                | ELSE saltoLinea SIFFUNC:s {:
+                    Nodo node = new Nodo("ELSE",parser.cont);
+                    parser.cont++;
+                    if (s != null){
+                        node.addHijo(s);
+                    }
+                    node.addHijo(s);
+                    RESULT = node;
+                :} 
                 |
                 | ELSEIF error THEN saltoLinea FUNCINSTRUC SIFFUNC {: System.out.println("Error en la condición"); :}
                 | ELSEIF CONDICION error saltoLinea FUNCINSTRUC SIFFUNC {: System.out.println("Se esperaba un THEN"); :}
@@ -121,7 +382,12 @@ SIFFUNC     ::= ELSEIF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC
 FORFUNC     ::= FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC NEXT;
 DOWHILEFUNC ::= DO WHILE CONDICION saltoLinea FUNCINSTRUC LOOP | DO saltoLinea FUNCINSTRUC LOOP WHILE CONDICION;
 
-RETVAL      ::= RETURN VAL;
+RETVAL      ::= RETURN VAL:v {:
+                    Nodo node = new Nodo("RETURN",parser.cont);
+                    parser.cont++;
+                    node.addHijo(v);
+                    RESULT = node;
+                :};
 
 VAL         ::= VALASIGN:v {:
                     RESULT=v;
@@ -139,7 +405,9 @@ CALL        ::= identificador:i PARENTESISL PARAMCALL:p PARENTESISR {:
                     parser.cont++;
                     node.addHijo(new Nodo(i,parser.cont));
                     parser.cont++;
-                    node.addHijo(p);
+                    if (p != null){
+                        node.addHijo(p);
+                    }                    
                     RESULT = node;
                 :}
                 | error PARENTESISL PARAMCALL PARENTESISR {: System.out.println("Se esperaba identificador"); :}
@@ -163,13 +431,44 @@ VARCALL     ::= VARCALL:v COMA VAL:val {:
                 | VARCALL error {: System.out.println("Error en parametros"); :};
 
 //gramática condiciones
-CONDICION   ::= CONDICION AND CONDICIONP 
-                | CONDICION OR CONDICIONP 
-                | NOT CONDICIONP
+CONDICION   ::= CONDICION:c AND CONDICIONP:c1 {:
+                    Nodo node = new Nodo("AND",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    node.addHijo(c1);
+                    RESULT=node;
+                :}
+                | CONDICION:c OR CONDICIONP:c1 {:
+                    Nodo node = new Nodo("OR",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    node.addHijo(c1);
+                    RESULT=node;
+                :}
+                | NOT CONDICIONP:c {:
+                    Nodo node = new Nodo("NOT",parser.cont);
+                    parser.cont++;
+                    node.addHijo(c);
+                    RESULT=node;
+                :}
 ;
-CONDICION   ::= CONDICIONP;
-CONDICIONP  ::= VALCOND OPCONDICION VALCOND;
-OPCONDICION ::= OPREL | IGUAL;              
+CONDICION   ::= CONDICIONP:c {: RESULT = c; :};
+
+CONDICIONP  ::= VALCOND:v OPCONDICION:o VALCOND:v2 {:
+                    Nodo node = new Nodo(o,parser.cont);
+                    parser.cont++;
+                    node.addHijo(v);
+                    node.addHijo(v2);
+                    RESULT = node;
+                :};
+
+OPCONDICION ::= OPREL:o {: 
+                    RESULT=o;
+                :} 
+                | IGUAL {: 
+                    RESULT="=";
+                :}
+;              
 
 VALCOND     ::= VALASIGN:v {:
                     RESULT=v;

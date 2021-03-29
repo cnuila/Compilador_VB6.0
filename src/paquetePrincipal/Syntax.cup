@@ -3,8 +3,8 @@ import java_cup.runtime.Symbol;
 
 parser code
 {:
-    public static Nodo padre;
-    public static int cont = 1;
+    public static Nodo raiz;    
+    public int cont = 0;
 
     public void syntax_error(Symbol s){
         System.out.println("Syntax error: " +  s.value + " Linea: " + (s.left + 1) + " Columna: " + (s.right + 1));
@@ -14,6 +14,7 @@ parser code
 :}
 
 
+terminal IF, ELSE, END, THEN, ELSEIF, identificador, IGUAL, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, INTEGER, STRINGTYPE, OPREL, OPADICION, OPMULTI, AND, OR, NOT, MODULE, SUB, PARENTESISL, PARENTESISR, CONTINUE, EXIT, FOR, TO, NEXT, STEP, STRUCTURE, WHILE, DO, UNTIL, LOOP, RETURN, CONCATSTRING, STRING, FUNCTION, READ, WRITE;
 
 terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, LLAMADOSTRUC, identificador, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, INTEGER, STRINGTYPE, OPREL, OPADICION, OPMULTI, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, CONTINUE, EXIT, FOR, TO, NEXT, STEP, WHILE, DO, UNTIL, LOOP, RETURN, CONCATSTRING, STRING, FUNCTION, READ, WRITE;
 
@@ -25,19 +26,14 @@ precedence left OPREL;
 precedence left OPADICION;
 precedence left OPMULTI;
 
-S           ::= INICIO {:
-                            Nodo node = new Nodo("Inicio",parser.cont);                            
-                            parser.cont++;
-                            parser.padre = node;
-                            RESULT = node;
-                        :};
+start with S;
 
-INICIO      ::= MODULE identificador saltoLinea MDLINSTRUC END MODULE {:System.out.println("Listo Module");:}
-                | error identificador saltoLinea MDLINSTRUC END MODULE {: System.out.println("Se esparaba un MODULE"); :}
-                | MODULE error saltoLinea MDLINSTRUC END MODULE {: System.out.println("Se esperaba un identificador para el module"); :}
-                | MODULE identificador error MDLINSTRUC END MODULE {: System.out.println("Se esperaba un salto de línea en el encabezado del module"); :}
-                | MODULE identificador saltoLinea MDLINSTRUC error MODULE {: System.out.println("Se esperaba un END"); :}
-                | MODULE identificador saltoLinea MDLINSTRUC END error {: System.out.println("Se esperaba un MODULE al final del archivo"); :}; 
+S      ::= MODULE identificador saltoLinea MDLINSTRUC END MODULE {:System.out.println("Listo Module");:}
+            | error identificador saltoLinea MDLINSTRUC END MODULE {: System.out.println("Se esparaba un MODULE"); :}
+            | MODULE error saltoLinea MDLINSTRUC END MODULE {: System.out.println("Se esperaba un identificador para el module"); :}
+            | MODULE identificador error MDLINSTRUC END MODULE {: System.out.println("Se esperaba un salto de línea en el encabezado del module"); :}
+            | MODULE identificador saltoLinea MDLINSTRUC error MODULE {: System.out.println("Se esperaba un END"); :}
+            | MODULE identificador saltoLinea MDLINSTRUC END error {: System.out.println("Se esperaba un MODULE al final del archivo"); :}; 
 
 //Instrucciones dentro del Module
 MDLINSTRUC  ::= DECLARACION MDLINSTRUC | saltoLinea MDLINSTRUC | FUNC MDLINSTRUC | SUBPROCE MDLINP| STRUCTUREDECLA MDLINSTRUC;

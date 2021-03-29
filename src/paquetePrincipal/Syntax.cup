@@ -16,9 +16,9 @@ parser code
 terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, LLAMADOSTRUC, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, OPREL, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI;
 
-nonterminal S, MDLINP, SUBPROCE,STRUCTUREDECLA, ASIGNSTRUC, SUBINSTRUC, SIFSUB, PARAMS, FUNC, FUNCINSTRUC, SIFFUNC, RETVAL, CONDICION, CONDICIONP, VALCOND, OPCONDICION, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER, VALASIGN, VALINT, ASIGN, ASIGNINT, VALUNIRSTR, OPASING, ASIGNOTRO, IFSUB, IFFUNC;
-nonterminal Nodo MDLINSTRUC, WRCONSOLE, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT;
-nonterminal String VALWR, UNIRSTRNG, TIPO;
+nonterminal S, MDLINP, SUBPROCE,STRUCTUREDECLA, ASIGNSTRUC, SUBINSTRUC, SIFSUB, FUNC, FUNCINSTRUC, SIFFUNC, RETVAL, CONDICION, CONDICIONP, OPCONDICION, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER, IFSUB, IFFUNC;
+nonterminal Nodo MDLINSTRUC, WRCONSOLE, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO,PARAMS,VALCOND;
+nonterminal String VALWR, UNIRSTRNG, VALUNIRSTR, TIPO;
 
 precedence left IGUAL;
 precedence left OPREL;
@@ -171,15 +171,36 @@ CONDICION   ::= CONDICIONP;
 CONDICIONP  ::= VALCOND OPCONDICION VALCOND;
 OPCONDICION ::= OPREL | IGUAL;              
 
-VALCOND     ::= VALASIGN | VALINT;
+VALCOND     ::= VALASIGN:v {:
+                    RESULT=v;
+                :}  
+                | VALINT:v {:
+                    RESULT=v;
+                :} 
+;
 
 //gramática parámetros
-PARAMS      ::=  VARS | ;
+PARAMS      ::=  VARS:v {: 
+                    RESULT = v;
+                :} | ;
 
 //gramática asignacion
-ASIGN       ::= ASIGNOTRO | ASIGNINT| ASIGNSTRUC; 
+ASIGN       ::= ASIGNOTRO:a {:
+                    RESULT = a;
+                :}
+                | ASIGNINT:a {:
+                    RESULT = a;
+                :}
+                | ASIGNSTRUC; 
 
-ASIGNOTRO   ::= identificador IGUAL VALASIGN;
+ASIGNOTRO   ::= identificador:id IGUAL VALASIGN:v {:
+                    Nodo node = new Nodo("ASIGNACION",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(v);
+                    RESULT=node;
+                :};
 
 ASIGNSTRUC  ::= LLAMADOSTRUC IGUAL VALASIGN | LLAMADOSTRUC OPASING VALINT;
 
@@ -203,20 +224,55 @@ VALASIGN    ::= STRING:str {:
                     parser.cont++;
                     RESULT=node;
                 :} 
-                | READ:r {:
-                    RESULT = r;
+                | READ {:
+                    Nodo node = new Nodo("read console",parser.cont);
+                    parser.cont++;
+                    RESULT = node;
                 :} ;
 
-UNIRSTRNG   ::= VALUNIRSTR CONCATSTRING UNIRSTRNG | VALUNIRSTR CONCATSTRING VALUNIRSTR;
-VALUNIRSTR  ::= STRING | identificador | error {: System.out.println("Se esperaba un valor String"); :};
+UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
+                    RESULT=v+ustr;
+                :} 
+                | VALUNIRSTR:v CONCATSTRING VALUNIRSTR:v2 {:
+                    RESULT= v+v2;
+                :}
+;
 
-ASIGNINT    ::= identificador OPASING VALINT
+VALUNIRSTR  ::= STRING:str {: RESULT=str; :} | identificador:id {:RESULT=id;:} | error {: System.out.println("Se esperaba un valor String"); :};
+
+ASIGNINT    ::= identificador:id OPASING:o VALINT:v {:
+                    Nodo node = new Nodo("ASIGNACION",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(o);
+                    node.addHijo(v);
+                    RESULT = node;
+                :}
                 | identificador error VALINT {: System.out.println("Error en asignación"); :}
                 | error OPASING VALINT {: System.out.println("Error en asignación"); :}
 ;
 
-OPASING     ::= IGUAL | OPMULTI IGUAL | OPADICION IGUAL;
-VALINT      ::= OPARIT;
+OPASING     ::= IGUAL {:
+                    Nodo node = new Nodo("=",parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :} 
+                | OPMULTI:op IGUAL {:
+                    Nodo node = new Nodo(op+"=",parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :}  
+                | OPADICION:op IGUAL {:
+                    Nodo node = new Nodo(op+"=",parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :}  
+;
+
+VALINT      ::= OPARIT:o {:
+                    RESULT = o;
+                :};
 
 //gramática operaciones aritméticas
 OPARIT      ::= OPARIT:o OPADICION:oPa OP:op {:                     

@@ -1,0 +1,179 @@
+package paquetePrincipal;
+import java_cup.runtime.Symbol;
+
+parser code
+{:
+    public static Nodo padre;
+    public static int cont = 1;
+
+    public void syntax_error(Symbol s){
+        System.out.println("Syntax error: " +  s.value + " Linea: " + (s.left + 1) + " Columna: " + (s.right + 1));
+    }
+
+    //public void unrecovered_syntax_error
+:}
+
+
+
+terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, identificador, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, INTEGER, STRINGTYPE, OPREL, OPADICION, OPMULTI, AND, OR, NOT, MODULE, SUB, PARENTESISL, PARENTESISR, CONTINUE, EXIT, FOR, TO, NEXT, STEP, STRUCTURE, WHILE, DO, UNTIL, LOOP, RETURN, CONCATSTRING, STRING, FUNCTION, READ, WRITE;
+
+nonterminal INICIO, MDLINSTRUC, MDLINP, SUBPROCE, SUBINSTRUC, SIFSUB, PARAMS, FUNC, FUNCINSTRUC, SIFFUNC, RETVAL, VAL, CALL, VARCALL, PARAMCALL, CONDICION, CONDICIONP, VALCOND, OPCONDICION, TIPO, TIPOIGUAL, CANTVARS, VARS, T, DECLARACION, OPARIT, OP, OPP, VALASIGN, VALINT, ASIGN, ASIGNINT, UNIRSTRNG, VALUNIRSTR, OPASING, ASIGNOTRO, WRCONSOLE, VALWR, IFSUB, IFFUNC;
+nonterminal Nodo S;
+
+precedence left IGUAL;
+precedence left OPREL;
+precedence left OPADICION;
+precedence left OPMULTI;
+
+S           ::= INICIO {:
+                            Nodo node = new Nodo("Inicio",parser.cont);                            
+                            parser.cont++;
+                            parser.padre = node;
+                            RESULT = node;
+                        :};
+
+INICIO      ::= MODULE identificador saltoLinea MDLINSTRUC END MODULE {:System.out.println("Listo Module");:}
+                | error identificador saltoLinea MDLINSTRUC END MODULE {: System.out.println("Se esparaba un MODULE"); :}
+                | MODULE error saltoLinea MDLINSTRUC END MODULE {: System.out.println("Se esperaba un identificador para el module"); :}
+                | MODULE identificador error MDLINSTRUC END MODULE {: System.out.println("Se esperaba un salto de línea en el encabezado del module"); :}
+                | MODULE identificador saltoLinea MDLINSTRUC error MODULE {: System.out.println("Se esperaba un END"); :}
+                | MODULE identificador saltoLinea MDLINSTRUC END error {: System.out.println("Se esperaba un MODULE al final del archivo"); :}; 
+
+//Instrucciones dentro del Module
+MDLINSTRUC  ::= DECLARACION MDLINSTRUC | saltoLinea MDLINSTRUC | FUNC MDLINSTRUC | SUBPROCE MDLINP;
+MDLINP      ::= DECLARACION MDLINP | saltoLinea MDLINP | SUBPROCE MDLINP | FUNC MDLINP | saltoLinea;
+
+//Instrucciones de un subprocedure
+SUBPROCE    ::= SUB identificador PARENTESISL PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB
+                | SUB error PARENTESISL PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: System.out.println("Se esperaba un identificador para el sub"); :}
+                | SUB identificador error PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: System.out.println("Se esperaba un parentesis izquierdo en el encabezado del sub"); :}
+                | SUB identificador PARENTESISL PARAMS error saltoLinea SUBINSTRUC END SUB {: System.out.println("Se esperaba un parentesis derecho en el encabezado del sub"); :}
+                | SUB identificador PARENTESISL PARAMS PARENTESISR error SUBINSTRUC END SUB {: System.out.println("Se esperaba un salto de linea en el encabezado del sub"); :}
+;
+
+SUBINSTRUC  ::= DECLARACION SUBINSTRUC | saltoLinea SUBINSTRUC | EXIT SUB SUBINSTRUC | ASIGN SUBINSTRUC | CALL SUBINSTRUC | WRCONSOLE SUBINSTRUC| IFSUB SUBINSTRUC
+                | error SUBINSTRUC {: System.out.println("Error desconocido"); :}
+                | error SUB SUBINSTRUC {: System.out.println("Se esperaba un EXIT o END"); :}                 
+                | ;
+
+IFSUB       ::= IF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB END IF
+                | IF error THEN saltoLinea SUBINSTRUC SIFSUB END IF {: System.out.println("Error en codición del if"); :}
+                | IF CONDICION error saltoLinea SUBINSTRUC SIFSUB END IF {: System.out.println("Se esperaba un THEN"); :}
+                | IF CONDICION THEN error SUBINSTRUC SIFSUB END IF {: System.out.println("Se esperaba un salto de linea"); :}
+                | IF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB END error {: System.out.println("Se esperaba un IF"); :}
+;
+
+SIFSUB      ::= ELSEIF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB 
+                | ELSE saltoLinea SUBINSTRUC 
+                |
+                | ELSEIF error THEN saltoLinea SUBINSTRUC SIFSUB {: System.out.println("Error en la condición"); :}
+                | ELSEIF CONDICION error saltoLinea SUBINSTRUC SIFSUB {: System.out.println("Se esperaba un THEN"); :}
+                | ELSEIF CONDICION THEN error SUBINSTRUC SIFSUB {: System.out.println("Se esperaba un salto de línea"); :}
+                | ELSE error SUBINSTRUC {: System.out.println("Se esperaba un salto de línea"); :}
+;
+
+//Instrucciones de una función
+FUNC        ::= FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION
+                | FUNCTION error PARENTESISL PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un identificador para la función"); :}
+                | FUNCTION identificador error PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un parentesis izquierdo en el encabezado de la función"); :}
+                | FUNCTION identificador PARENTESISL PARAMS error AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un parentesis derecho en el encabezado de la función"); :}
+                | FUNCTION identificador PARENTESISL PARAMS PARENTESISR error TIPO saltoLinea FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un AS en el encabezado de la función"); :}
+                | FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS error saltoLinea FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un TIPO en el encabezado de la función"); :}
+                | FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS TIPO error FUNCINSTRUC END FUNCTION {: System.out.println("Se esperaba un salto de línea en el encabezado de la función"); :}
+;
+
+FUNCINSTRUC ::= DECLARACION FUNCINSTRUC | saltoLinea FUNCINSTRUC | EXIT FUNCTION FUNCINSTRUC | ASIGN FUNCINSTRUC | RETVAL FUNCINSTRUC | CALL FUNCINSTRUC | WRCONSOLE FUNCINSTRUC | IFFUNC FUNCINSTRUC
+                | 
+                | error FUNC FUNCINSTRUC {: System.out.println("Se esperaba un EXIT o END"); :} 
+                | error FUNCINSTRUC {: System.out.println("Error desconocido"); :}       
+;
+
+IFFUNC      ::= IF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC END IF
+                | IF error THEN saltoLinea FUNCINSTRUC SIFFUNC END IF {: System.out.println("Error en codición del if"); :}
+                | IF CONDICION error saltoLinea FUNCINSTRUC SIFFUNC END IF {: System.out.println("Se esperaba un THEN"); :}
+                | IF CONDICION THEN error FUNCINSTRUC SIFFUNC END IF {: System.out.println("Se esperaba un salto de linea"); :}
+                | IF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC END error {: System.out.println("Se esperaba un IF"); :} 
+;        
+
+SIFFUNC     ::= ELSEIF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC 
+                | ELSE saltoLinea SIFFUNC 
+                |
+                | ELSEIF error THEN saltoLinea FUNCINSTRUC SIFFUNC {: System.out.println("Error en la condición"); :}
+                | ELSEIF CONDICION error saltoLinea FUNCINSTRUC SIFFUNC {: System.out.println("Se esperaba un THEN"); :}
+                | ELSEIF CONDICION THEN error FUNCINSTRUC SIFFUNC {: System.out.println("Se esperaba un salto de línea"); :}
+                | ELSE error SIFFUNC {: System.out.println("Se esperaba un salto de línea"); :}
+;
+
+RETVAL      ::= RETURN VAL;
+VAL         ::= VALASIGN | VALINT;
+
+//llamado de funcion o sub procedure
+CALL        ::= identificador PARENTESISL PARAMCALL PARENTESISR
+                | error PARENTESISL PARAMCALL PARENTESISR {: System.out.println("Se esperaba identificador"); :}
+;                
+
+PARAMCALL   ::= VARCALL | ;
+VARCALL     ::= VARCALL COMA VAL | VAL | VARCALL error {: System.out.println("Error en parametros"); :};
+
+//gramática condiciones
+CONDICION   ::= CONDICION AND CONDICIONP 
+                | CONDICION OR CONDICIONP 
+                | NOT CONDICIONP
+;
+CONDICION   ::= CONDICIONP;
+CONDICIONP  ::= VALCOND OPCONDICION VALCOND;
+OPCONDICION ::= OPREL | IGUAL;              
+
+VALCOND     ::= VALASIGN | VALINT;
+
+//gramática parámetros
+PARAMS      ::=  VARS | ;
+
+//gramática asignacion
+ASIGN       ::= ASIGNOTRO | ASIGNINT; 
+
+ASIGNOTRO   ::= identificador IGUAL VALASIGN;
+
+VALASIGN    ::= STRING | TRUE | FALSE | UNIRSTRNG | READ;
+
+UNIRSTRNG   ::= VALUNIRSTR CONCATSTRING UNIRSTRNG | VALUNIRSTR CONCATSTRING VALUNIRSTR;
+VALUNIRSTR  ::= STRING | identificador | error {: System.out.println("Se esperaba un valor String"); :};
+
+ASIGNINT    ::= identificador OPASING VALINT
+                | identificador error VALINT {: System.out.println("Error en asignación"); :}
+                | error OPASING VALINT {: System.out.println("Error en asignación"); :}
+;
+
+OPASING     ::= IGUAL | OPMULTI IGUAL | OPADICION IGUAL;
+VALINT      ::= OPARIT;
+
+//gramática operaciones aritméticas
+OPARIT      ::= OPARIT OPADICION OP | OP;
+OP          ::= OP OPMULTI OPP | OPP;
+OPP         ::= INTEGER | identificador | CALL | PARENTESISL OPARIT PARENTESISR | error {: System.out.println("Error en operación con Integer"); :};
+
+//gramática declaración de variables
+DECLARACION ::= DIM T | DIM error {: System.out.println("Error en declaración"); :};
+T           ::= identificador AS TIPOIGUAL 
+                | identificador AS TIPO COMA VARS 
+                | identificador COMA CANTVARS AS TIPO COMA VARS 
+                | identificador COMA CANTVARS AS TIPO  
+                | identificador AS TIPO              
+;
+VARS        ::= CANTVARS AS TIPO COMA VARS 
+                | CANTVARS AS TIPO 
+                | CANTVARS error {: System.out.println("Error en variables"); :}
+;
+CANTVARS    ::= CANTVARS COMA identificador | identificador;
+TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT | STRINGTYPE IGUAL STRING | BOOLEANTYPE IGUAL TRUE | BOOLEANTYPE IGUAL FALSE | STRINGTYPE IGUAL UNIRSTRNG;
+TIPO        ::= INTEGERTYPE | STRINGTYPE | BOOLEANTYPE;
+
+//gramática escribir en consola
+WRCONSOLE   ::= WRITE PARENTESISL VALWR PARENTESISR
+                | WRITE error VALWR PARENTESISR {: System.out.println("Error en console.write"); :}       
+                
+;
+VALWR       ::= identificador | STRING | UNIRSTRNG | error {: System.out.println("Se esperaba un String"); :};
+
+//restantes
+SUBINSTRUC  ::= CONTINUE FOR TO NEXT STEP STRUCTURE WHILE DO UNTIL LOOP;

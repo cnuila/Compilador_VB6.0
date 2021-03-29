@@ -1,0 +1,27 @@
+Module VbModule
+        Sub Main()
+                If count = 0 Then
+                        a = 0 + 4 * 5 + (2+3) * (3+5)
+                        
+                        If count = prueba(3) Then
+                                dim count2 as Integer = f + 3
+                                a = "a" & a
+                                c = a
+                                h = prueba (9)
+                        elseif a > a AND c>4  then
+                                dim count2 as Integer = 0
+                                Dim a as Integer, x, y As String, i As Integer
+                                Dim a,d as Integer
+                                x = "Hola jeej" & " ADios" & a
+                                y = "Aqui empiezo"&_
+                                        "Aqui sigo"
+                                console.writeline("Hola Mundo")
+                                console.writeline(b)
+                                console.writeline(a & x)
+                        else                                             
+                        Exit Sub 
+                        End If           
+                end If                
+        end sub
+         
+End Module

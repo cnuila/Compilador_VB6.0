@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package paquetePrincipal;
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -35,9 +34,9 @@ public class Nodo {
         gv.decreaseDpi();
         gv.decreaseDpi();
         //linux
-        //File out = new File("./"+fileName+gv.getImageDpi()+"."+ type);
+        File out = new File("./"+fileName+gv.getImageDpi()+"."+ type);
         //windows
-        File out = new File(fileName + "." + type);
+        //File out = new File(fileName + "." + type);
         gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), type, repesentationType), out);
     }
     
@@ -48,7 +47,7 @@ public class Nodo {
     
     public void addHijo(Nodo hijo){
         this.hijos.add(hijo);
-    }
+    }    
 
     public String getEtiqueta() {
         return etiqueta;

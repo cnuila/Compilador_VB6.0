@@ -8,61 +8,57 @@ package paquetePrincipal;
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int FUNCTION = 45;
-  public static final int PARENTESISR = 31;
-  public static final int PARENTESISL = 30;
-  public static final int INTEGER = 19;
-  public static final int CONTINUE = 32;
-  public static final int identificador = 5;
-  public static final int FOR = 34;
-  public static final int WRITE = 47;
-  public static final int LLAMADOSTRUC = 10;
-  public static final int NOT = 26;
-  public static final int AND = 24;
-  public static final int OPMULTI = 23;
-  public static final int ELSEIF = 7;
-  public static final int IGUAL = 8;
-  public static final int OR = 25;
-  public static final int UNTIL = 40;
-  public static final int OPREL = 21;
-  public static final int LOOP = 41;
-  public static final int NEXT = 36;
-  public static final int EXIT = 33;
+  public static final int FUNCTION = 36;
+  public static final int PARENTESISR = 26;
+  public static final int PARENTESISL = 25;
+  public static final int INTEGER = 41;
+  public static final int identificador = 39;
+  public static final int FOR = 28;
+  public static final int WRITE = 38;
+  public static final int LLAMADOSTRUC = 9;
+  public static final int NOT = 21;
+  public static final int AND = 19;
+  public static final int OPMULTI = 43;
+  public static final int ELSEIF = 6;
+  public static final int IGUAL = 7;
+  public static final int OR = 20;
+  public static final int OPREL = 44;
+  public static final int NEXT = 30;
+  public static final int LOOP = 33;
+  public static final int EXIT = 27;
   public static final int IF = 2;
-  public static final int DIM = 12;
+  public static final int DIM = 11;
   public static final int EOF = 0;
-  public static final int CONCATSTRING = 43;
-  public static final int RETURN = 42;
-  public static final int TRUE = 16;
-  public static final int NEW = 27;
+  public static final int CONCATSTRING = 35;
+  public static final int RETURN = 34;
+  public static final int TRUE = 15;
+  public static final int NEW = 22;
   public static final int error = 1;
-  public static final int COMA = 13;
-  public static final int BOOLEANTYPE = 15;
-  public static final int OPADICION = 22;
-  public static final int MODULE = 28;
+  public static final int COMA = 12;
+  public static final int BOOLEANTYPE = 14;
+  public static final int OPADICION = 42;
+  public static final int MODULE = 23;
   public static final int ELSE = 3;
-  public static final int READ = 46;
-  public static final int TO = 35;
-  public static final int WHILE = 38;
-  public static final int STRINGTYPE = 20;
-  public static final int saltoLinea = 11;
-  public static final int THEN = 6;
-  public static final int STRUCTURE = 9;
+  public static final int READ = 37;
+  public static final int TO = 29;
+  public static final int WHILE = 31;
+  public static final int STRINGTYPE = 18;
+  public static final int saltoLinea = 10;
+  public static final int THEN = 5;
+  public static final int STRUCTURE = 8;
   public static final int END = 4;
-  public static final int STRING = 44;
-  public static final int FALSE = 17;
-  public static final int AS = 14;
-  public static final int INTEGERTYPE = 18;
-  public static final int SUB = 29;
-  public static final int DO = 39;
-  public static final int STEP = 37;
+  public static final int STRING = 40;
+  public static final int FALSE = 16;
+  public static final int AS = 13;
+  public static final int INTEGERTYPE = 17;
+  public static final int SUB = 24;
+  public static final int DO = 32;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
   "IF",
   "ELSE",
   "END",
-  "identificador",
   "THEN",
   "ELSEIF",
   "IGUAL",
@@ -76,11 +72,7 @@ public class sym {
   "TRUE",
   "FALSE",
   "INTEGERTYPE",
-  "INTEGER",
   "STRINGTYPE",
-  "OPREL",
-  "OPADICION",
-  "OPMULTI",
   "AND",
   "OR",
   "NOT",
@@ -89,22 +81,24 @@ public class sym {
   "SUB",
   "PARENTESISL",
   "PARENTESISR",
-  "CONTINUE",
   "EXIT",
   "FOR",
   "TO",
   "NEXT",
-  "STEP",
   "WHILE",
   "DO",
-  "UNTIL",
   "LOOP",
   "RETURN",
   "CONCATSTRING",
-  "STRING",
   "FUNCTION",
   "READ",
-  "WRITE"
+  "WRITE",
+  "identificador",
+  "STRING",
+  "INTEGER",
+  "OPADICION",
+  "OPMULTI",
+  "OPREL"
   };
 }
 

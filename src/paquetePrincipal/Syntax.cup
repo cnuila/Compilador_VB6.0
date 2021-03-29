@@ -70,7 +70,14 @@ MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:
                     node.addHijo(md);
                     RESULT=node;
                 :}
-                | STRUCTUREDECLA MDLINSTRUC;
+                | STRUCTUREDECLA:sd MDLINSTRUC:md {:                    
+                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(sd);
+                    node.addHijo(md);
+                    RESULT=node;
+                :}
+;
 
 MDLINP      ::= DECLARACION:d MDLINP:m {:
                     Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
@@ -104,7 +111,15 @@ MDLINP      ::= DECLARACION:d MDLINP:m {:
                     }                    
                     RESULT=node;
                 :}
-                | STRUCTUREDECLA MDLINP 
+                | STRUCTUREDECLA:sd MDLINP:m {:
+                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(sd);
+                    if (m != null){
+                        node.addHijo(m);
+                    }                    
+                    RESULT=node;
+                :}
                 | saltoLinea {:
                     Nodo node = new Nodo("VACIO",parser.cont);
                     parser.cont++;                                   
@@ -112,13 +127,36 @@ MDLINP      ::= DECLARACION:d MDLINP:m {:
                 :};
 
 //Intrucciones de una Structure
-STRUCTUREDECLA   ::= STRUCTURE identificador saltoLinea DECLARACION END STRUCTURE
+STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea DECLARACIONESSTRUCT:d END STRUCTURE{:
+                            Nodo node = new Nodo("STRUCTURE",parser.cont);
+                            parser.cont++;
+                            node.addHijo(new Nodo(id,parser.cont));
+                            parser.cont++;
+                            if (d != null){
+                                node.addHijo(d);
+                            }
+                            RESULT = node;
+                :}
                      | STRUCTURE error saltoLinea DECLARACION END STRUCTURE {: System.out.println("Se esperaba un identificador para la structure"); :}
                      | STRUCTURE identificador error DECLARACION END STRUCTURE {: System.out.println("Se esperaba un salto de linea"); :}
                      | STRUCTURE identificador saltoLinea error END STRUCTURE {: System.out.println("error en la declaracion del structure"); :}
                      | STRUCTURE identificador saltoLinea DECLARACION END error {: System.out.println("Se esperaba un identificador para la structure"); :}
 ;
-
+DECLARACIONESSTRUCT ::= DECLARACION:d DECLARACIONESSTRUCT:ds {:
+                            Nodo node = new Nodo("DECLARACION",parser.cont);
+                            node.addHijo(d);
+                            parser.cont++;
+                            if (ds != null){
+                                node.addHijo(ds);
+                            }
+                            RESULT = node;
+                :}
+                | {:
+                    Nodo node = new Nodo("VACIO",parser.cont);
+                    parser.cont++;                                   
+                    RESULT = node;
+                :}
+;
 //Instrucciones de un subprocedure
 SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea SUBINSTRUC:s END SUB {:
                         Nodo node = new Nodo("SUB",parser.cont);
@@ -199,7 +237,24 @@ SUBINSTRUC  ::= DECLARACION:d SUBINSTRUC:s {:
                     }                   
                     RESULT = node;
                 :}
-                | FORSUB SUBINSTRUC| DOWHILESUB SUBINSTRUC
+                | FORSUB:f SUBINSTRUC:s {: 
+                    Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(f);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    RESULT = node;
+                :}
+                | DOWHILESUB:d SUBINSTRUC:s{: 
+                    Nodo node = new Nodo("SUB INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(d);
+                    if (s != null){
+                        node.addHijo(s);   
+                    }                   
+                    RESULT = node;
+                :}
                 | error SUBINSTRUC {: System.out.println("Error desconocido"); :}
                 | error SUB SUBINSTRUC {: System.out.println("Se esperaba un EXIT o END"); :}                 
                 | {:
@@ -257,7 +312,15 @@ SIFSUB      ::= ELSEIF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 {:
                 | ELSE error SUBINSTRUC {: System.out.println("Se esperaba un salto de línea"); :}
 ;
 
-DOWHILESUB  ::= DO WHILE CONDICION saltoLinea SUBINSTRUC LOOP | DO saltoLinea SUBINSTRUC LOOP WHILE CONDICION
+DOWHILESUB  ::= DO WHILE CONDICION:c saltoLinea SUBINSTRUC:s LOOP{:
+                            Nodo node = new Nodo("DO WHILE",parser.cont);
+                            parser.cont++;
+                            node.addHijo(c);
+                            if (s != null){
+                                node.addHijo(s);
+                            }
+                            RESULT = node;
+                :}
                 | error WHILE CONDICION saltoLinea SUBINSTRUC LOOP {: System.out.println("Se esperaba un DO"); :}
                 | DO error CONDICION saltoLinea SUBINSTRUC LOOP {: System.out.println("Se esperaba un WHILE"); :}
                 | DO WHILE error saltoLinea SUBINSTRUC LOOP {: System.out.println("Error en la condicion"); :}
@@ -265,7 +328,16 @@ DOWHILESUB  ::= DO WHILE CONDICION saltoLinea SUBINSTRUC LOOP | DO saltoLinea SU
                 | DO WHILE CONDICION saltoLinea SUBINSTRUC error {: System.out.println("Se esperaba un LOOP"); :}
 ;
 
-FORSUB      ::= FOR COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT
+FORSUB      ::= FOR COUNTER:c TO OPARIT:o saltoLinea SUBINSTRUC:s NEXT{:
+                            Nodo node = new Nodo("FOR",parser.cont);
+                            parser.cont++;
+                            node.addHijo(c);
+                            node.addHijo(o);
+                            if (s != null){
+                                node.addHijo(s);
+                            }
+                            RESULT = node;
+                :}
                 | error COUNTER TO OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Se esperaba un FOR"); :}
                 | FOR error TO OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Error en la asignacion del contador del for"); :}
                 | FOR COUNTER error OPARIT saltoLinea SUBINSTRUC NEXT {: System.out.println("Se esperaba un TO"); :}
@@ -362,7 +434,24 @@ FUNCINSTRUC ::= DECLARACION:d FUNCINSTRUC:f {:
                     }                    
                     RESULT = node;
                 :}
-                | FORFUNC FUNCINSTRUC | DOWHILEFUNC FUNCINSTRUC 
+                | FORFUNC:ff FUNCINSTRUC:f {: 
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(ff);
+                    if (f != null){
+                        node.addHijo(f);
+                    }                    
+                    RESULT = node;
+                :}
+                | DOWHILEFUNC:d FUNCINSTRUC:f {: 
+                    Nodo node = new Nodo("FUN INSTRUCTIONS",parser.cont);
+                    parser.cont++;
+                    node.addHijo(d);
+                    if (f != null){
+                        node.addHijo(f);
+                    }                    
+                    RESULT = node;
+                :}
                 | {:
                     Nodo node = new Nodo("VACIO",parser.cont);
                     parser.cont++;                                   
@@ -422,7 +511,16 @@ SIFFUNC     ::= ELSEIF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s {:
                 | ELSE error SIFFUNC {: System.out.println("Se esperaba un salto de línea"); :}
 ;
 
-FORFUNC     ::= FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC NEXT
+FORFUNC     ::= FOR COUNTER:c TO OPARIT:o saltoLinea FUNCINSTRUC:f NEXT{:
+                            Nodo node = new Nodo("FOR",parser.cont);
+                            parser.cont++;
+                            node.addHijo(c);
+                            node.addHijo(o);
+                            if (f != null){
+                                node.addHijo(f);
+                            }
+                            RESULT = node;
+                :}
                 | error COUNTER TO OPARIT saltoLinea FUNINSTRUC NEXT {: System.out.println("Se esperaba un FOR"); :}
                 | FOR error TO OPARIT saltoLinea FUNCINSTRUC NEXT {: System.out.println("Error en la asignacion del contador del for"); :}
                 | FOR COUNTER error OPARIT saltoLinea FUNCINSTRUC NEXT {: System.out.println("Se esperaba un TO"); :}
@@ -430,7 +528,15 @@ FORFUNC     ::= FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC NEXT
                 | FOR COUNTER TO OPARIT saltoLinea FUNCINSTRUC error {: System.out.println("Se esperaba un NEXT"); :}
 ;
 
-DOWHILEFUNC ::= DO WHILE CONDICION saltoLinea FUNCINSTRUC LOOP | DO saltoLinea FUNCINSTRUC LOOP WHILE CONDICION
+DOWHILEFUNC ::= DO WHILE CONDICION:c saltoLinea FUNCINSTRUC:f LOOP{:
+                            Nodo node = new Nodo("DO WHILE",parser.cont);
+                            parser.cont++;
+                            node.addHijo(c);
+                            if (f != null){
+                                node.addHijo(f);
+                            }
+                            RESULT = node;
+                :}
                 | error WHILE CONDICION saltoLinea FUNCINSTRUC LOOP {: System.out.println("Se esperaba un DO"); :}
                 | DO error CONDICION saltoLinea FUNCINSTRUC LOOP {: System.out.println("Se esperaba un WHILE"); :}
                 | DO WHILE error saltoLinea FUNCINSTRUC LOOP {: System.out.println("Error en la condicion"); :}
@@ -453,7 +559,19 @@ VAL         ::= VALASIGN:v {:
                 :} ;
 
 //Instrucciones del for
-COUNTER     ::= ASIGNINT | identificador AS INTEGERTYPE IGUAL OPARIT
+COUNTER     ::= ASIGNINT:ai {:
+                    RESULT=ai;
+                :} 
+                | identificador:id AS INTEGERTYPE IGUAL OPARIT:op{:
+                            Nodo node = new Nodo("=",parser.cont);
+                            parser.cont++;
+                            node.addHijo(new Nodo(id,parser.cont));
+                            parser.cont++;
+                            node.addHijo(new Nodo("INTEGER",parser.cont));
+                            parser.cont++;
+                            node.addHijo(op);
+                            RESULT = node;
+                :}
                          | error AS INTEGERTYPE IGUAL OPARIT {: System.out.println("Se esperaba un identificador"); :}
                          | identificador error OPARIT {: System.out.println("Error en asignar el tipo"); :}
 ;
@@ -740,7 +858,6 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     parser.cont++;
                     RESULT = node;
                 :}
-                | identificador AS identificador IGUAL NEW CALL
 ;
 
 VARS        ::= CANTVARS:c AS TIPO:t COMA VARS:v {:
@@ -816,15 +933,23 @@ TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
                 | STRINGTYPE IGUAL UNIRSTRNG:ustr {:
                     Nodo node = new Nodo("=",parser.cont);
                     parser.cont++;
-                    node.addHijo(new Nodo("BOOLEAN",parser.cont));
+                    node.addHijo(new Nodo("STRING",parser.cont));
                     parser.cont++;
                     node.addHijo(new Nodo(ustr,parser.cont));
                     parser.cont++;
                     RESULT=node;
                 :}
+                |identificador:id IGUAL NEW CALL:c {:
+                    Nodo node = new Nodo("=",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(c);
+                    RESULT=node;
+                :}
 ;
 
-TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRING"; :} | BOOLEANTYPE {: RESULT="BOOLEAN"; :} ;
+TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRING"; :} | BOOLEANTYPE {: RESULT="BOOLEAN"; :} | identificador:id {: RESULT=id :} ;
 
 //gramática escribir en consola
 WRCONSOLE   ::= WRITE PARENTESISL VALWR:v PARENTESISR {:

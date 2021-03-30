@@ -42,6 +42,8 @@ public class Main extends javax.swing.JFrame {
         jtext_log = new javax.swing.JTextPane();
         jb_cargarArchivo = new javax.swing.JButton();
         jb_analizar = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jt_codigo = new javax.swing.JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -49,7 +51,7 @@ public class Main extends javax.swing.JFrame {
 
         jScrollPane1.setViewportView(jtext_log);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 490, 220));
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 140, 270, 290));
 
         jb_cargarArchivo.setText("Cargar Archivo");
         jb_cargarArchivo.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -57,7 +59,7 @@ public class Main extends javax.swing.JFrame {
                 jb_cargarArchivoMouseClicked(evt);
             }
         });
-        jPanel1.add(jb_cargarArchivo, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 20, 150, -1));
+        jPanel1.add(jb_cargarArchivo, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 40, 150, -1));
 
         jb_analizar.setText("Analizar");
         jb_analizar.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -65,17 +67,22 @@ public class Main extends javax.swing.JFrame {
                 jb_analizarMouseClicked(evt);
             }
         });
-        jPanel1.add(jb_analizar, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 20, 150, -1));
+        jPanel1.add(jb_analizar, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 90, 150, -1));
+
+        jt_codigo.setEditable(false);
+        jScrollPane2.setViewportView(jt_codigo);
+
+        jPanel1.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 530, 420));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 846, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 444, Short.MAX_VALUE)
         );
 
         pack();
@@ -89,20 +96,22 @@ public class Main extends javax.swing.JFrame {
             FileNameExtensionFilter filtro = new FileNameExtensionFilter("Visual Basic", "vb");
             jfc.addChoosableFileFilter(filtro);
             jfc.setAcceptAllFileFilterUsed(false);
-            int seleccion = jfc.showOpenDialog(this);            
+            int seleccion = jfc.showOpenDialog(this);
             if (seleccion == JFileChooser.APPROVE_OPTION) {
                 archivoActual = new File(jfc.getSelectedFile().getPath());
                 JOptionPane.showMessageDialog(this, "El archivo se cargo exitosamente", "Información", JOptionPane.INFORMATION_MESSAGE);
-            }
-            FileReader fr = null;
-            BufferedReader br = null;
-            fr = new FileReader(archivoActual);
-            br = new BufferedReader(fr);
+                FileReader fr = null;
+                BufferedReader br = null;
+                fr = new FileReader(archivoActual);
+                br = new BufferedReader(fr);
 
-            // Lectura del fichero
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                System.out.println(linea);
+                String texto = "";
+                String linea;
+                while ((linea = br.readLine()) != null) {
+                    texto += linea +="\n";
+                }
+                jt_codigo.setText(texto);
+                jtext_log.setText("");
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -111,27 +120,34 @@ public class Main extends javax.swing.JFrame {
 
     private void jb_analizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jb_analizarMouseClicked
         try {
-            Lexer scanner = new Lexer(new FileReader(archivoActual));            
+            Lexer scanner = new Lexer(new FileReader(archivoActual));
             parser miParser = new parser(scanner);
             miParser.parse();
             String log = "Inicia el analisis\n"
                     + "-------------------------------------------------------\n";
             jtext_log.setText(log);
-            if (miParser.errores.isEmpty()) {
+            if (miParser.errores.isEmpty() && scanner.errors.isEmpty()) {
                 String formato = "edge [color=blue];" + hacerDFS(miParser.raiz);
                 miParser.raiz.exportarArbol(formato, "AST");
                 log += "No se encontraron errores\n\nSe genero el AST\n";
                 jtext_log.setText("");
                 jtext_log.setText(log);
             } else {
-                for (int i = 0; i < miParser.errores.size(); i++) {
-                    log += miParser.errores.get(i) + "\n";
+                if (!miParser.errores.isEmpty()) {
+                    for (int i = 0; i < miParser.errores.size(); i++) {
+                        log += miParser.errores.get(i) + "\n";
+                    }
+                }
+                if (!scanner.errors.isEmpty()) {
+                    for (int i = 0; i < scanner.errors.size(); i++) {
+                        log += scanner.errors.get(i) + "\n";
+                    }
                 }
                 jtext_log.setText("");
                 jtext_log.setText(log);
             }
             log += "-------------------------------------------------------\n"
-                  +  "Finalizo el analisis\n";
+                    + "Finalizo el analisis\n";
             jtext_log.setText("");
             jtext_log.setText(log);
         } catch (Exception e) {
@@ -210,8 +226,10 @@ public class Main extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton jb_analizar;
     private javax.swing.JButton jb_cargarArchivo;
+    private javax.swing.JTextPane jt_codigo;
     private javax.swing.JTextPane jtext_log;
     // End of variables declaration//GEN-END:variables
 }

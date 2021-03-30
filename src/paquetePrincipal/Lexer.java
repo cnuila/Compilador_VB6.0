@@ -4,6 +4,7 @@
 
 package paquetePrincipal;
 import java_cup.runtime.Symbol;
+import java.util.ArrayList;
 
 // See https://github.com/jflex-de/jflex/issues/222
 @SuppressWarnings("FallThrough")
@@ -450,6 +451,7 @@ class Lexer implements java_cup.runtime.Scanner {
 
   /* user code: */
     String cadena = "";
+    ArrayList<String> errors = new ArrayList();
 
 
   /**
@@ -858,7 +860,7 @@ class Lexer implements java_cup.runtime.Scanner {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { System.out.println("Error léxico en: " + (yyline + 1) + " " + (yycolumn + 1));
+            { errors.add("Error léxico en: Linea: " + (yyline + 1) + " Columna: " + (yycolumn + 1));
             }
             // fall through
           case 50: break;

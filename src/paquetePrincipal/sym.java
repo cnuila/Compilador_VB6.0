@@ -8,51 +8,51 @@ package paquetePrincipal;
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int FUNCTION = 36;
-  public static final int PARENTESISR = 26;
-  public static final int PARENTESISL = 25;
-  public static final int INTEGER = 41;
-  public static final int identificador = 39;
-  public static final int FOR = 28;
-  public static final int WRITE = 38;
-  public static final int LLAMADOSTRUC = 9;
-  public static final int NOT = 21;
-  public static final int AND = 19;
-  public static final int OPMULTI = 43;
+  public static final int FUNCTION = 35;
+  public static final int PARENTESISR = 25;
+  public static final int PARENTESISL = 24;
+  public static final int INTEGER = 40;
+  public static final int identificador = 38;
+  public static final int FOR = 27;
+  public static final int WRITE = 37;
+  public static final int LLAMADOSTRUC = 44;
+  public static final int NOT = 20;
+  public static final int AND = 18;
+  public static final int OPMULTI = 42;
   public static final int ELSEIF = 6;
   public static final int IGUAL = 7;
-  public static final int OR = 20;
-  public static final int OPREL = 44;
-  public static final int NEXT = 30;
-  public static final int LOOP = 33;
-  public static final int EXIT = 27;
+  public static final int OR = 19;
+  public static final int OPREL = 43;
+  public static final int NEXT = 29;
+  public static final int LOOP = 32;
+  public static final int EXIT = 26;
   public static final int IF = 2;
-  public static final int DIM = 11;
+  public static final int DIM = 10;
   public static final int EOF = 0;
-  public static final int CONCATSTRING = 35;
-  public static final int RETURN = 34;
-  public static final int TRUE = 15;
-  public static final int NEW = 22;
+  public static final int CONCATSTRING = 34;
+  public static final int RETURN = 33;
+  public static final int TRUE = 14;
+  public static final int NEW = 21;
   public static final int error = 1;
-  public static final int COMA = 12;
-  public static final int BOOLEANTYPE = 14;
-  public static final int OPADICION = 42;
-  public static final int MODULE = 23;
+  public static final int COMA = 11;
+  public static final int BOOLEANTYPE = 13;
+  public static final int OPADICION = 41;
+  public static final int MODULE = 22;
   public static final int ELSE = 3;
-  public static final int READ = 37;
-  public static final int TO = 29;
-  public static final int WHILE = 31;
-  public static final int STRINGTYPE = 18;
-  public static final int saltoLinea = 10;
+  public static final int READ = 36;
+  public static final int TO = 28;
+  public static final int WHILE = 30;
+  public static final int STRINGTYPE = 17;
+  public static final int saltoLinea = 9;
   public static final int THEN = 5;
   public static final int STRUCTURE = 8;
   public static final int END = 4;
-  public static final int STRING = 40;
-  public static final int FALSE = 16;
-  public static final int AS = 13;
-  public static final int INTEGERTYPE = 17;
-  public static final int SUB = 24;
-  public static final int DO = 32;
+  public static final int STRING = 39;
+  public static final int FALSE = 15;
+  public static final int AS = 12;
+  public static final int INTEGERTYPE = 16;
+  public static final int SUB = 23;
+  public static final int DO = 31;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -63,7 +63,6 @@ public class sym {
   "ELSEIF",
   "IGUAL",
   "STRUCTURE",
-  "LLAMADOSTRUC",
   "saltoLinea",
   "DIM",
   "COMA",
@@ -98,7 +97,8 @@ public class sym {
   "INTEGER",
   "OPADICION",
   "OPMULTI",
-  "OPREL"
+  "OPREL",
+  "LLAMADOSTRUC"
   };
 }
 

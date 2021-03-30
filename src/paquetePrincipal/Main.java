@@ -89,18 +89,29 @@ public class Main extends javax.swing.JFrame {
             FileNameExtensionFilter filtro = new FileNameExtensionFilter("Visual Basic", "vb");
             jfc.addChoosableFileFilter(filtro);
             jfc.setAcceptAllFileFilterUsed(false);
-            int seleccion = jfc.showOpenDialog(this);
+            int seleccion = jfc.showOpenDialog(this);            
             if (seleccion == JFileChooser.APPROVE_OPTION) {
                 archivoActual = new File(jfc.getSelectedFile().getPath());
                 JOptionPane.showMessageDialog(this, "El archivo se cargo exitosamente", "Información", JOptionPane.INFORMATION_MESSAGE);
             }
+            FileReader fr = null;
+            BufferedReader br = null;
+            fr = new FileReader(archivoActual);
+            br = new BufferedReader(fr);
+
+            // Lectura del fichero
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                System.out.println(linea);
+            }
         } catch (Exception e) {
+            System.out.println(e);
         }
     }//GEN-LAST:event_jb_cargarArchivoMouseClicked
 
     private void jb_analizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jb_analizarMouseClicked
         try {
-            Lexer scanner = new Lexer(new FileReader(archivoActual));
+            Lexer scanner = new Lexer(new FileReader(archivoActual));            
             parser miParser = new parser(scanner);
             miParser.parse();
             String log = "Inicia el analisis\n";
@@ -108,17 +119,17 @@ public class Main extends javax.swing.JFrame {
             if (miParser.errores.isEmpty()) {
                 String formato = "edge [color=blue];" + hacerDFS(miParser.raiz);
                 miParser.raiz.exportarArbol(formato, "AST");
-                log+="Se genero el arbol AST\n";
+                log += "Se genero el arbol AST\n";
                 jtext_log.setText("");
                 jtext_log.setText(log);
             } else {
-                for(int i = 0; i < miParser.errores.size();i++){
+                for (int i = 0; i < miParser.errores.size(); i++) {
                     log += miParser.errores.get(i) + "\n";
                 }
                 jtext_log.setText("");
                 jtext_log.setText(log);
             }
-            log+= "Finalizo el analisas\n";
+            log += "Finalizo el analisas\n";
             jtext_log.setText("");
             jtext_log.setText(log);
         } catch (Exception e) {

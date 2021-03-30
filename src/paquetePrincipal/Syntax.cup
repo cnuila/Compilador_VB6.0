@@ -15,12 +15,12 @@ parser code
     //public void unrecovered_syntax_error
 :}
 
-terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, LLAMADOSTRUC, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
-terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL;
+terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
+terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
 
 nonterminal S;
-nonterminal Nodo MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, PARAMS, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER;
-nonterminal String VALWR, UNIRSTRNG, VALUNIRSTR, TIPO, OPCONDICION;
+nonterminal Nodo MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, UNIRSTRNG, VALWR, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, PARAMS, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER;
+nonterminal String VALUNIRSTR, TIPO, OPCONDICION;
 
 precedence left IGUAL;
 precedence left OPREL;
@@ -71,7 +71,8 @@ MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:
                     node.addHijo(s);
                     node.addHijo(md);
                     RESULT=node;
-                :}| STRUCTUREDECLA:sd MDLINSTRUC:md {:                    
+                :}
+                | STRUCTUREDECLA:sd MDLINSTRUC:md {:                    
                     Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
                     parser.cont++;
                     node.addHijo(sd);
@@ -128,19 +129,16 @@ MDLINP      ::= DECLARACION:d MDLINP:m {:
                 :};
 
 //Intrucciones de una Structure
-STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea DECLARACION:d END STRUCTURE{:
+STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea DECLARACION:d saltoLinea END STRUCTURE {:
                             Nodo node = new Nodo("STRUCTURE",parser.cont);
                             parser.cont++;
                             node.addHijo(new Nodo(id,parser.cont));
-                            parser.cont++;
-                            if (d != null){
-                                node.addHijo(d);
-                            }
+                            parser.cont++; 
+                            node.addHijo(d);                            
                             RESULT = node;
                 :}
                      | STRUCTURE error saltoLinea DECLARACION END STRUCTURE {: errores.add("Se esperaba un identificador para la structure"); :}
                      | STRUCTURE identificador error DECLARACION END STRUCTURE {: errores.add("Se esperaba un salto de linea"); :}
-                     | STRUCTURE identificador saltoLinea error END STRUCTURE {: errores.add("error en la declaracion del structure"); :}
                      | STRUCTURE identificador saltoLinea DECLARACION END error {: errores.add("Se esperaba un identificador para la structure"); :}
 ;
 
@@ -667,7 +665,7 @@ ASIGN       ::= ASIGNOTRO:a {:
                 :}; 
 
 ASIGNOTRO   ::= identificador:id IGUAL VALASIGN:v {:
-                    Nodo node = new Nodo("ASIGNACION",parser.cont);
+                    Nodo node = new Nodo("=",parser.cont);
                     parser.cont++;
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
@@ -676,20 +674,18 @@ ASIGNOTRO   ::= identificador:id IGUAL VALASIGN:v {:
                 :};
 
 ASIGNSTRUC  ::= LLAMADOSTRUC:l IGUAL VALASIGN:va {:
-                    Nodo node = new Nodo("ASIGNACION",parser.cont);
+                    Nodo node = new Nodo("=",parser.cont);
                     parser.cont++;
                     node.addHijo(new Nodo(l,parser.cont));
                     parser.cont++;
-                    node.addHijo(v);
+                    node.addHijo(va);
                     RESULT=node;
                 :} 
-                | LLAMADOSTRUC:l OPASING VALINT:v{:
-                    Nodo node = new Nodo("ASIGNACION",parser.cont);
-                    parser.cont++;
-                    node.addHijo(new Nodo(l,parser.cont));
-                    parser.cont++;
-                    node.addHijo(v);
-                    RESULT=node;
+                | LLAMADOSTRUC:l OPASING:o VALINT:v{:
+                    o.addHijo(new Nodo(l,parser.cont));                    
+                    parser.cont++;                
+                    o.addHijo(v);
+                    RESULT=o;
                 :};
 
 VALASIGN    ::= STRING:str {:
@@ -708,9 +704,7 @@ VALASIGN    ::= STRING:str {:
                     RESULT=node;
                 :} 
                 | UNIRSTRNG:ustr {:
-                    Nodo node = new Nodo(ustr,parser.cont);
-                    parser.cont++;
-                    RESULT=node;
+                    RESULT=ustr;
                 :} 
                 | READ {:
                     Nodo node = new Nodo("read console",parser.cont);
@@ -719,23 +713,31 @@ VALASIGN    ::= STRING:str {:
                 :} ;
 
 UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
-                    RESULT=v+ustr;
+                    Nodo node = new Nodo("&",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(v,parser.cont));
+                    parser.cont++;
+                    node.addHijo(ustr);
+                    RESULT= node;
                 :} 
                 | VALUNIRSTR:v CONCATSTRING VALUNIRSTR:v2 {:
-                    RESULT= v+v2;
+                    Nodo node = new Nodo("&",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(v,parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo(v2,parser.cont));
+                    parser.cont++;
+                    RESULT= node;
                 :}
 ;
 
 VALUNIRSTR  ::= STRING:str {: RESULT=str.substring(1,str.length()-1); :} | identificador:id {:RESULT=id;:} | error {: errores.add("Se esperaba un valor String"); :};
 
 ASIGNINT    ::= identificador:id OPASING:o VALINT:v {:
-                    Nodo node = new Nodo("ASIGNACION",parser.cont);
+                    o.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
-                    node.addHijo(new Nodo(id,parser.cont));
-                    parser.cont++;
-                    node.addHijo(o);
-                    node.addHijo(v);
-                    RESULT = node;
+                    o.addHijo(v);
+                    RESULT = o;
                 :}
                 | identificador error VALINT {: errores.add("Error en asignación"); :}
                 | error OPASING VALINT {: errores.add("Error en asignación"); :}
@@ -938,8 +940,7 @@ TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
                     parser.cont++;
                     node.addHijo(new Nodo("STRING",parser.cont));
                     parser.cont++;
-                    node.addHijo(new Nodo(ustr,parser.cont));
-                    parser.cont++;
+                    node.addHijo(ustr);
                     RESULT=node;
                 :}|identificador:id IGUAL NEW CALL:c {:
                     Nodo node = new Nodo("=",parser.cont);
@@ -951,18 +952,30 @@ TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
                 :}
 ;
 
-TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRING"; :} | BOOLEANTYPE {: RESULT="BOOLEAN"; :} | identificador:id {: RESULT=id :} ;
+TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRING"; :} | BOOLEANTYPE {: RESULT="BOOLEAN"; :} | identificador:id {: RESULT=id; :} ;
 
 //gramática escribir en consola
 WRCONSOLE   ::= WRITE PARENTESISL VALWR:v PARENTESISR {:
                     Nodo node = new Nodo("console.write",parser.cont);
                     parser.cont++;
-                    node.addHijo(new Nodo(v,parser.cont));
-                    parser.cont++;
+                    node.addHijo(v);
                     RESULT=node;
                 :}
                 | WRITE error VALWR PARENTESISR {: errores.add("Error en console.write"); :}       
                 
 ;
 
-VALWR       ::= identificador:id {: RESULT=id; :} | STRING:str {: RESULT=str.substring(1,str.length()-1);; :} | UNIRSTRNG:ustr {: RESULT=ustr; :} | error {: errores.add("Se esperaba un String"); :};
+VALWR       ::= identificador:id {: 
+                    Nodo node = new Nodo(id,parser.cont);
+                    parser.cont++;
+                    RESULT=node; 
+                :} 
+                | STRING:str {: 
+                    Nodo node = new Nodo(str.substring(1,str.length()-1),parser.cont);
+                    parser.cont++;
+                    RESULT=node;
+                :} 
+                | UNIRSTRNG:ustr {: 
+                    RESULT=ustr; 
+                :} 
+                | error {: errores.add("Se esperaba un String"); :};

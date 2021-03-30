@@ -1,7 +1,9 @@
 Module VbModule
 
         Structure employee
+            dim name as String
             dim salary as Integer
+            dim age as Integer
         end structure
 
         Sub Main()

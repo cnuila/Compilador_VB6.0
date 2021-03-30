@@ -108,7 +108,7 @@ public class Main extends javax.swing.JFrame {
                 String texto = "";
                 String linea;
                 while ((linea = br.readLine()) != null) {
-                    texto += linea +="\n";
+                    texto += linea +"\n";
                 }
                 jt_codigo.setText(texto);
                 jtext_log.setText("");

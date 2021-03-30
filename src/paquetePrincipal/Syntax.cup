@@ -21,7 +21,7 @@ terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, A
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
 
 nonterminal S;
-nonterminal Nodo MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, UNIRSTRNG, VALWR, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, PARAMS, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER;
+nonterminal Nodo MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, PARAMS, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER;
 nonterminal String VALUNIRSTR, TIPO, OPCONDICION;
 
 precedence left IGUAL;
@@ -131,18 +131,34 @@ MDLINP      ::= DECLARACION:d MDLINP:m {:
                 :};
 
 //Intrucciones de una Structure
-STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea DECLARACION:d saltoLinea END STRUCTURE {:
+STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea STRUCTINSTRUC:s END STRUCTURE {:
                             Nodo node = new Nodo("STRUCTURE",parser.cont);
                             parser.cont++;
                             node.addHijo(new Nodo(id,parser.cont));
                             parser.cont++; 
-                            node.addHijo(d);                            
+                            node.addHijo(s);                            
                             RESULT = node;
                 :}
-                     | STRUCTURE error saltoLinea DECLARACION END STRUCTURE {: errores.add("Se esperaba un identificador para la structure"); :}
-                     | STRUCTURE identificador error DECLARACION END STRUCTURE {: errores.add("Se esperaba un salto de linea"); :}
+                     | STRUCTURE error saltoLinea STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un identificador para la structure"); :}
+                     | STRUCTURE identificador error STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un salto de linea"); :}
                      | STRUCTURE identificador saltoLinea DECLARACION END error {: errores.add("Se esperaba un identificador para la structure"); :}
 ;
+
+STRUCTINSTRUC   ::= DECLARACION:d STRUCTINSTRUC:s {:
+                        Nodo node = new Nodo("STRUCTURE INSTRUCTIONS",parser.cont);
+                        parser.cont++;
+                        node.addHijo(d);
+                        node.addHijo(s);                            
+                        RESULT = node;
+                    :} 
+                    | saltoLinea STRUCTINSTRUC:s {:
+                        RESULT=s;
+                    :} 
+                    | saltoLinea {:
+                        Nodo node = new Nodo("VACIO",parser.cont);
+                        parser.cont++;                            
+                        RESULT = node;
+                    :};
 
 //Instrucciones de un subprocedure
 SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea SUBINSTRUC:s END SUB {:

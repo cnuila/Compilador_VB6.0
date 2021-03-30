@@ -1,7 +1,7 @@
 Module VbModule
 
-        function factorial(n As Integer) As 
-                If n  0 Then
+        function factorial(n As Integer) As Integer
+                n = 0 Then
                     return 0
                 else
                     return factorial(n-1)

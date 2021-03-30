@@ -12,7 +12,9 @@ parser code
         errores.add("Syntax error: " +  s.value + " Linea: " + (s.left + 1) + " Columna: " + (s.right + 1));
     }
 
-    //public void unrecovered_syntax_error
+    public void unrecovered_syntax_error(Symbol s){
+        errores.add("Error desconocido: " +  s.value + " Linea: " + (s.left + 1) + " Columna: " + (s.right + 1));
+    }
 :}
 
 terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;

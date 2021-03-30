@@ -1316,7 +1316,9 @@ public class parser extends java_cup.runtime.lr_parser {
         errores.add("Syntax error: " +  s.value + " Linea: " + (s.left + 1) + " Columna: " + (s.right + 1));
     }
 
-    //public void unrecovered_syntax_error
+    public void unrecovered_syntax_error(Symbol s){
+        errores.add("Error desconocido: " +  s.value + " Linea: " + (s.left + 1) + " Columna: " + (s.right + 1));
+    }
 
 
 /** Cup generated class to encapsulate user supplied action code.*/

@@ -114,12 +114,13 @@ public class Main extends javax.swing.JFrame {
             Lexer scanner = new Lexer(new FileReader(archivoActual));            
             parser miParser = new parser(scanner);
             miParser.parse();
-            String log = "Inicia el analisis\n";
+            String log = "Inicia el analisis\n"
+                    + "-------------------------------------------------------\n";
             jtext_log.setText(log);
             if (miParser.errores.isEmpty()) {
                 String formato = "edge [color=blue];" + hacerDFS(miParser.raiz);
                 miParser.raiz.exportarArbol(formato, "AST");
-                log += "Se genero el arbol AST\n";
+                log += "No se encontraron errores\n\nSe genero el AST\n";
                 jtext_log.setText("");
                 jtext_log.setText(log);
             } else {
@@ -129,7 +130,8 @@ public class Main extends javax.swing.JFrame {
                 jtext_log.setText("");
                 jtext_log.setText(log);
             }
-            log += "Finalizo el analisas\n";
+            log += "-------------------------------------------------------\n"
+                  +  "Finalizo el analisis\n";
             jtext_log.setText("");
             jtext_log.setText(log);
         } catch (Exception e) {

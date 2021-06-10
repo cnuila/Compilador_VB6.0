@@ -7,6 +7,7 @@ parser code
     public Nodo raiz;    
     public int cont = 0;
     public ArrayList<String> errores = new ArrayList<>();
+    public TablaSimbolos tablaSimbolos = new TablaSimbolos();    
 
     public void syntax_error(Symbol s){
         errores.add("Syntax error: " +  s.value + " Linea: " + (s.left + 1) + " Columna: " + (s.right + 1));
@@ -21,8 +22,9 @@ terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, A
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
 
 nonterminal S;
-nonterminal Nodo MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, TIPOIGUAL, OPARIT, CANTVARS, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, PARAMS, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER;
+nonterminal Nodo MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER;
 nonterminal String VALUNIRSTR, TIPO, OPCONDICION;
+nonterminal Objeto CANTVARS, TIPOIGUAL, CANTVARS2, VARPARAMS, PARAMS, VARS2;
 
 precedence left IGUAL;
 precedence left OPREL;
@@ -167,11 +169,15 @@ SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea
                         node.addHijo(new Nodo(id,parser.cont));
                         parser.cont++;
                         if (p != null){
-                            node.addHijo(p);
+                            node.addHijo(p.getNodo());
                         }
                         if (s != null){
                             node.addHijo(s);
-                        }                          
+                        }
+
+                        //agregar ambito y offset
+                        tablaSimbolos.agregarID(id,p.getTipo()+"->void","","");
+
                         RESULT=node;
                 :}
                 | SUB error PARENTESISL PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: errores.add("Se esperaba un identificador para el sub"); :}
@@ -352,14 +358,18 @@ FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TI
                         parser.cont++;
                         node.addHijo(new Nodo(id,parser.cont));
                         parser.cont++;
-                        if (p != null){
-                            node.addHijo(p);
+                        if (p.getNodo() != null){
+                            node.addHijo(p.getNodo());
                         }                        
                         node.addHijo(new Nodo(t,parser.cont));
                         parser.cont++;
                         if (f != null){
                             node.addHijo(f);
-                        }                        
+                        }
+
+                        //agregar ambito y offset
+                        tablaSimbolos.agregarID(id,p.getTipo()+"->"+t,"","");
+
                         RESULT=node;
                 :}
                 | FUNCTION error PARENTESISL PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un identificador para la función"); :}
@@ -662,14 +672,98 @@ VALCOND     ::= VALASIGN:v {:
 ;
 
 //gramática parámetros
-PARAMS      ::=  VARS:v {: 
+PARAMS      ::=  VARPARAMS:v {:
                     RESULT = v;
                 :} 
                 | {:
                     Nodo node = new Nodo("VACIO",parser.cont);
-                    parser.cont++;                                   
-                    RESULT = node;
+                    parser.cont++;
+
+                    Objeto retVal = new Objeto(node,"void");
+                    RESULT = retVal;
                 :};
+
+VARPARAMS      ::= identificador:id AS TIPO:t COMA VARS2:v {:
+                        Nodo node = new Nodo("PARAMS",parser.cont);
+                        parser.cont++;
+                        node.addHijo(new Nodo(id,parser.cont));
+                        parser.cont++;
+                        node.addHijo(new Nodo(t,parser.cont));
+                        parser.cont++;
+                        node.addHijo(v.getNodo());
+
+                        Objeto retVal = new Objeto(node, t+v.getAcumulada());
+                        RESULT = retVal;
+                    :}
+                    |identificador:id COMA CANTVARS2:c COMA VARS2:v {:
+                        Nodo node = new Nodo("PARAMS",parser.cont);
+                        parser.cont++;
+                        node.addHijo(new Nodo(id,parser.cont));
+                        parser.cont++;
+                        node.addHijo(c.getNodo());
+                        node.addHijo(v.getNodo());
+
+                        Objeto retVal = new Objeto(node, c.getTipo()+c.getAcumulada()+v.getAcumulada());
+                        RESULT = retVal;
+                    :}
+                    | identificador:id COMA CANTVARS2:c {: 
+                        Nodo node = new Nodo("PARAMS",parser.cont);
+                        parser.cont++;
+                        node.addHijo(new Nodo(id,parser.cont));
+                        parser.cont++;
+                        node.addHijo(c.getNodo());
+
+                        Objeto retVal = new Objeto(node, c.getTipo()+ c.getAcumulada());
+                        RESULT = retVal;
+                    :}
+                    | identificador:id AS TIPO:t {:
+                        Nodo node = new Nodo("PARAMS",parser.cont);
+                        parser.cont++;
+                        node.addHijo(new Nodo(id,parser.cont));
+                        parser.cont++;
+                        node.addHijo(new Nodo(t,parser.cont));
+                        parser.cont++;
+
+                        Objeto retVal = new Objeto(node,t); 
+                        RESULT = retVal;
+                    :}
+;
+
+VARS2           ::= CANTVARS2:c COMA VARS2:v {:
+                    Nodo node = new Nodo("VARS", parser.cont);
+                    parser.cont++;
+                    node.addHijo(c.getNodo());
+                    node.addHijo(v.getNodo());
+
+                    Objeto retVal = new Objeto(node, c.getTipo(), c.getAcumulada()+v.getAcumulada());
+                    RESULT = retVal;
+                :}
+                | CANTVARS2:c {:
+                    RESULT = c;
+                :}                
+;
+
+CANTVARS2       ::= identificador:id COMA CANTVARS2:c {:
+                        Nodo node = new Nodo("VARS",parser.cont);
+                        parser.cont++;
+                        node.addHijo(new Nodo(id,parser.cont));
+                        parser.cont++;
+                        node.addHijo(c.getNodo());
+
+                        Objeto retVal = new Objeto(node, c.getTipo(),"x"+c.getTipo()+c.getAcumulada());                    
+                        RESULT=retVal;   
+                    :}
+                    | identificador:id AS TIPO:t {:
+                        Nodo node = new Nodo("VARS",parser.cont);   
+                        parser.cont++;
+                        node.addHijo(new Nodo(id,parser.cont));
+                        parser.cont++;           
+                        node.addHijo(new Nodo(t,parser.cont));
+                        parser.cont++;
+
+                        Objeto retVal = new Objeto(node, t,"x"+t);                                  
+                        RESULT=retVal;
+                    :};
 
 //gramática asignacion
 ASIGN       ::= ASIGNOTRO:a {:
@@ -838,7 +932,11 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     parser.cont++;
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
-                    node.addHijo(t);
+                    node.addHijo(t.getNodo());
+
+                    //agregar ambito y offset
+                    tablaSimbolos.agregarID(id,t.getTipo(),"","");
+                    
                     RESULT = node;
                 :}
                 | identificador:id AS TIPO:t COMA VARS:v {:
@@ -849,27 +947,35 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     node.addHijo(new Nodo(t,parser.cont));
                     parser.cont++;
                     node.addHijo(v);
+
+                    //agregar ambito y offset
+                    tablaSimbolos.agregarID(id,t,"","");
+
                     RESULT = node;
                 :}
-                | identificador:id COMA CANTVARS:c AS TIPO:t COMA VARS:v {:
+                | identificador:id COMA CANTVARS:c COMA VARS:v {:
                     Nodo node = new Nodo("DECLARACION",parser.cont);
                     parser.cont++;
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
-                    node.addHijo(c);
-                    node.addHijo(new Nodo(t,parser.cont));
-                    parser.cont++;
+                    node.addHijo(c.getNodo());
                     node.addHijo(v);
+
+                    //agregar ambito y offset
+                    tablaSimbolos.agregarID(id,c.getTipo(),"","");
+
                     RESULT = node;
                 :}
-                | identificador:id COMA CANTVARS:c AS TIPO:t {:
+                | identificador:id COMA CANTVARS:c {: 
                     Nodo node = new Nodo("DECLARACION",parser.cont);
                     parser.cont++;
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
-                    node.addHijo(c);
-                    node.addHijo(new Nodo(t,parser.cont));
-                    parser.cont++;
+                    node.addHijo(c.getNodo());
+
+                    //agregar ambito y offset
+                    tablaSimbolos.agregarID(id,c.getTipo(),"","");
+
                     RESULT = node;
                 :}
                 | identificador:id AS TIPO:t {:
@@ -879,42 +985,52 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     parser.cont++;
                     node.addHijo(new Nodo(t,parser.cont));
                     parser.cont++;
+
+                    //agregar ambito y offset
+                    tablaSimbolos.agregarID(id,t,"","");  
+
                     RESULT = node;
                 :}
 ;
 
-VARS        ::= CANTVARS:c AS TIPO:t COMA VARS:v {:
+VARS        ::= CANTVARS:c COMA VARS:v {:
                     Nodo node = new Nodo("VARS", parser.cont);
                     parser.cont++;
-                    node.addHijo(c);
-                    node.addHijo(new Nodo(t,parser.cont));
-                    parser.cont++;
+                    node.addHijo(c.getNodo());
                     node.addHijo(v);
                     RESULT = node;
                 :}
-                | CANTVARS:c AS TIPO:t {:
-                    Nodo node = new Nodo("VARS", parser.cont);
-                    parser.cont++;
-                    node.addHijo(c);
-                    node.addHijo(new Nodo(t,parser.cont));
-                    parser.cont++;
-                    RESULT = node;
-                :}
-                | CANTVARS error {: errores.add("Error en variables"); :}
+                | CANTVARS:c {:
+                    RESULT = c.getNodo();
+                :}                
 ;
 
-CANTVARS    ::= CANTVARS:c COMA identificador:id {:
+CANTVARS    ::= identificador:id COMA CANTVARS:c {:
                     Nodo node = new Nodo("VARS",parser.cont);
                     parser.cont++;
-                    node.addHijo(c);
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
-                    RESULT=node;  
+                    node.addHijo(c.getNodo());
+
+                    //agregar ambito y offset
+                    tablaSimbolos.agregarID(id,c.getTipo(),"","");
+
+                    Objeto retVal = new Objeto(node, c.getTipo());                    
+                    RESULT=retVal;  
                 :}
-                | identificador:id {:
-                    Nodo node = new Nodo(id,parser.cont);
+                | identificador:id AS TIPO:t {:
+                    Nodo node = new Nodo("VARS",parser.cont);   
                     parser.cont++;
-                    RESULT=node;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;           
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+
+                    //agregar ambito y offset
+                    tablaSimbolos.agregarID(id,t,"","");
+
+                    Objeto retVal = new Objeto(node, t);                                  
+                    RESULT=retVal;
                 :}
 ;
 
@@ -924,7 +1040,10 @@ TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
                     node.addHijo(new Nodo("INTEGER",parser.cont));
                     parser.cont++;
                     node.addHijo(o);
-                    RESULT=node;                    
+
+                    //ojo oparit el valor
+                    Objeto retVal = new Objeto(node,"INTEGER");
+                    RESULT=retVal;                    
                 :}
                 | STRINGTYPE IGUAL STRING:str {:
                     Nodo node = new Nodo("=",parser.cont);
@@ -933,7 +1052,10 @@ TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
                     parser.cont++;
                     node.addHijo(new Nodo(str.substring(1,str.length()-1),parser.cont));
                     parser.cont++;
-                    RESULT=node; 
+
+                    //ojo str el valor
+                    Objeto retVal = new Objeto(node,"STRING");
+                    RESULT=retVal; 
                 :}
                 | BOOLEANTYPE IGUAL TRUE {:
                     Nodo node = new Nodo("=",parser.cont);
@@ -942,7 +1064,10 @@ TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
                     parser.cont++;
                     node.addHijo(new Nodo("TRUE",parser.cont));
                     parser.cont++;
-                    RESULT=node;  
+
+                    //ojo true
+                    Objeto retVal = new Objeto(node,"BOOLEAN");
+                    RESULT=retVal;  
                 :}
                 | BOOLEANTYPE IGUAL FALSE {:
                     Nodo node = new Nodo("=",parser.cont);
@@ -951,7 +1076,10 @@ TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
                     parser.cont++;
                     node.addHijo(new Nodo("FALSE",parser.cont));
                     parser.cont++;
-                    RESULT=node;
+
+                    //ojo false 
+                    Objeto retVal = new Objeto(node,"BOOLEAN");
+                    RESULT=retVal;
                 :}
                 | STRINGTYPE IGUAL UNIRSTRNG:ustr {:
                     Nodo node = new Nodo("=",parser.cont);
@@ -959,14 +1087,21 @@ TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
                     node.addHijo(new Nodo("STRING",parser.cont));
                     parser.cont++;
                     node.addHijo(ustr);
-                    RESULT=node;
-                :}|identificador:id IGUAL NEW CALL:c {:
+
+                    //ojo ustr
+                    Objeto retVal = new Objeto(node,"STRING");
+                    RESULT=retVal;
+                :}
+                |identificador:id IGUAL NEW CALL:c {:
                     Nodo node = new Nodo("=",parser.cont);
                     parser.cont++;
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
                     node.addHijo(c);
-                    RESULT=node;
+
+                    //ojo new call
+                    Objeto retVal = new Objeto(node,id);
+                    RESULT=retVal;
                 :}
 ;
 

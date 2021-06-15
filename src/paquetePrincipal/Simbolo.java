@@ -1,4 +1,5 @@
-package paquetePrincipal;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Simbolo {
     private String identificador;
@@ -6,6 +7,7 @@ public class Simbolo {
     private int offset;
     private String ambito;
     private int size;
+    private boolean verficada;
 
     public Simbolo(String _identificador, String _tipo, int _offset, String _ambito) {
         this.identificador = _identificador;
@@ -21,24 +23,48 @@ public class Simbolo {
             sizeT = 1;
         }
         this.size = sizeT;
+        this.verficada = false;
     }
 
-    public boolean esIgual(String identificadorComparar) {
-        if (this.identificador.equals(identificadorComparar)) {
+    public boolean esIgual(String identificadorComparar, String tipoComparar) {
+        if (this.identificador.equals(identificadorComparar) && this.tipo.equals(tipoComparar) && !this.verficada) {
             return true;
         }
         return false;
+    }    
+
+    public boolean esIgual(Simbolo simboloComparar) {
+        if (this.identificador.equals(simboloComparar.getIdentificador())) {
+            return true;
+        }
+        return false;
+    }    
+
+    public ArrayList<String> extraerAmbito(){
+        return new ArrayList<>(Arrays.asList(this.ambito.split("[.]")));
     }
 
-    public void setAmbitoPrefijo(String _ambito){
-        this.ambito = _ambito + this.ambito;
+    public String getIdentificador(){
+        return this.identificador;
+    }
+
+    public String getTipo(){
+        return this.tipo;
     }
 
     public int getSize(){
         return this.size;
+    }    
+
+    public void setAmbitoPrefijo(String _ambito){
+        this.ambito = _ambito + this.ambito;
+    }    
+
+    public void estaVerificada(boolean _verificada){
+        this.verficada = _verificada;
     }
 
     public String toString() {
-        return identificador + " " + tipo + " offset: " + offset + " ambito: " + ambito;
+        return identificador + " " + tipo + " offset: " + offset + " ambito: " + ambito + " verificada:"+verficada;
     }
 }

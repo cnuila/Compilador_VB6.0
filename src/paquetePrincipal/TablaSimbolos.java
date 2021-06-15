@@ -1,5 +1,3 @@
-package paquetePrincipal;
-
 import java.util.ArrayList;
 
 public class TablaSimbolos {
@@ -10,18 +8,13 @@ public class TablaSimbolos {
         tabla = new ArrayList<>();
     }
 
-    public void agregarID(String identificador, String tipo, int offset, String ambito){
-        tabla.add(new Simbolo(identificador,tipo,offset,ambito));
+    public ArrayList<Simbolo> getTabla(){
+        return this.tabla;
     }
 
-    public boolean existeId(String identificador){
-        for (Simbolo s: this.tabla){
-            if (s.esIgual(identificador)){
-                return true;
-            }
-        }
-        return false;
-    }
+    public void agregarID(String identificador, String tipo, int offset, String ambito){
+        tabla.add(new Simbolo(identificador,tipo,offset,ambito));
+    }    
 
     public void agregarAmbito(String ambito, int cantidadVars){
         for (int i = 0; i < cantidadVars; i++){
@@ -31,10 +24,59 @@ public class TablaSimbolos {
 
     public int sizeUltimo(){        
         return this.tabla.get(this.tabla.size() - 1).getSize();
+    }    
+
+    public int buscarSimbolo(String identificador, String tipo){
+        int i = 0;
+        for (Simbolo simbolo: this.tabla){
+            if (simbolo.esIgual(identificador, tipo)){
+                simbolo.estaVerificada(true);
+                return i;
+            }
+            i++;
+        }
+        return -1;
     }
 
-    public ArrayList<Simbolo> getTabla(){
-        return this.tabla;
+    // false error, true correcto
+    public boolean comprobarAmbito(int posSimboloComprobar){
+        Simbolo simboloComprobar = this.tabla.get(posSimboloComprobar);
+        ArrayList<String> ambitoComprobar = simboloComprobar.extraerAmbito();
+
+        for (int i = 0; i < posSimboloComprobar;i++){
+            Simbolo simboloIteracion = this.tabla.get(i);            
+            if (simboloComprobar.esIgual(simboloIteracion)){
+                ArrayList<String> ambitoIteracion = simboloIteracion.extraerAmbito();
+
+                // 0 todos iguales, 1 hay uno diferente                    
+                int comprobar = 0;
+                if (ambitoComprobar.size() == ambitoIteracion.size()){                    
+                    for(int j = 0; j < ambitoComprobar.size();j++){
+                        if (!ambitoComprobar.get(j).equals(ambitoIteracion.get(j))){                            
+                            comprobar = 1;
+                        }
+                    }
+                }
+
+                if (ambitoComprobar.size() > ambitoIteracion.size()){
+                    int diferencia = ambitoComprobar.size() - ambitoIteracion.size();
+                    for (int j = 0; j < ambitoComprobar.size() - diferencia;j++){
+                        if (!ambitoComprobar.get(j).equals(ambitoIteracion.get(j))){                            
+                            comprobar = 1;
+                        }
+                    }
+                }
+
+                if (ambitoComprobar.size() < ambitoIteracion.size()){
+                    comprobar = 1;
+                }
+
+                if (comprobar == 0){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public int disminuirOffset(int cantidadVars){

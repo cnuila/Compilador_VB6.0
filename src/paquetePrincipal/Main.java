@@ -133,6 +133,8 @@ public class Main extends javax.swing.JFrame {
                 jtext_log.setText("");
                 jtext_log.setText(log);
                 parser2 p2 = new parser2(new Lexer(new FileReader(args[0])));
+                p2.setErrores(p.errores);
+                p2.setTablaSimbolos(p.tablaSimbolos);
                 p2.parse(); 
             } else {
                 if (!miParser.errores.isEmpty()) {

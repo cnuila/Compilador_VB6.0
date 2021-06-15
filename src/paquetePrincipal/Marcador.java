@@ -1,5 +1,3 @@
-package paquetePrincipal;
-
 public class Marcador {
     private int numGuardar;
 

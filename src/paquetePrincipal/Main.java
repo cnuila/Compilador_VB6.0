@@ -132,6 +132,8 @@ public class Main extends javax.swing.JFrame {
                 log += "No se encontraron errores\n\nSe genero el AST\n";
                 jtext_log.setText("");
                 jtext_log.setText(log);
+                parser2 p2 = new parser2(new Lexer(new FileReader(args[0])));
+                p2.parse(); 
             } else {
                 if (!miParser.errores.isEmpty()) {
                     for (int i = 0; i < miParser.errores.size(); i++) {

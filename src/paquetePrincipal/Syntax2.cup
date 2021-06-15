@@ -1,0 +1,284 @@
+import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+
+class parser2;
+
+parser code
+{:
+    public int cont = 0;
+    //public ArrayList<String> errores = new ArrayList<>();
+    //public TablaSimbolos tablaSimbolos = new TablaSimbolos(); 
+    public int offset = 0;
+    public int cantVarsCreadas = 0;    
+
+:}
+
+terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
+terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
+
+nonterminal S, MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER, CANTVARS, TIPOIGUAL, CANTVARS2, VARPARAMS, PARAMS, VARS2,M,VALUNIRSTR, TIPO, OPCONDICION;
+
+precedence left IGUAL;
+precedence left OPREL;
+precedence left OPADICION;
+precedence left OPMULTI;
+
+start with S;
+
+S      ::= MODULE identificador:id saltoLinea MDLINSTRUC:m END MODULE {:
+            System.out.println("Listo Module");       
+        :}
+; 
+
+//if m != null
+//Instrucciones dentro del Module
+MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:                    
+                :}
+                | saltoLinea MDLINSTRUC:md {:
+                :}
+                | FUNC:f MDLINSTRUC:md {:                    
+                :}
+                | SUBPROCE:s MDLINP:md {:                    
+                :}
+                | STRUCTUREDECLA:sd MDLINSTRUC:md {:                    
+                    
+                :}
+                ;
+
+MDLINP      ::= DECLARACION:d MDLINP:m {:                
+                :}
+                | saltoLinea MDLINP:m {:     
+                :}
+                | SUBPROCE:s MDLINP:m {:
+
+                :}
+                | FUNC:f MDLINP:m {:
+                :}
+                | STRUCTUREDECLA:sd MDLINP:m {:
+                :} 
+                | saltoLinea {:
+                :};
+
+//Intrucciones de una Structure
+STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea STRUCTINSTRUC:s END STRUCTURE {:
+                :}
+;
+
+STRUCTINSTRUC   ::= DECLARACION:d STRUCTINSTRUC:s {:
+                    :} 
+                    | saltoLinea STRUCTINSTRUC:s {:
+                    :} 
+                    | saltoLinea {:
+                    :};
+
+//Instrucciones de un subprocedure
+SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea SUBINSTRUC:s END SUB {::}
+;
+
+//s != null
+SUBINSTRUC  ::= DECLARACION:d SUBINSTRUC:s {::} 
+                | saltoLinea SUBINSTRUC:s {::}
+                | EXIT SUB SUBINSTRUC:s {: :} 
+                | ASIGN:a SUBINSTRUC:s {: :}
+                | CALL:c SUBINSTRUC:s {: :}
+                | WRCONSOLE:w SUBINSTRUC:s {: :}
+                | IFSUB:i SUBINSTRUC:s {: :}
+                | FORSUB:f SUBINSTRUC:s {: :}
+                | DOWHILESUB:d SUBINSTRUC:s {::}                
+                | {::}
+;
+
+IFSUB       ::= IF CONDICION:c THEN M:m saltoLinea SUBINSTRUC:s SIFSUB:s2 END IF {::}
+;
+
+SIFSUB      ::= ELSEIF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 {::}
+                | ELSE saltoLinea SUBINSTRUC:s {::} 
+                | {::}                
+;
+
+DOWHILESUB  ::= DO WHILE CONDICION:c saltoLinea SUBINSTRUC:s LOOP{::}
+;
+
+FORSUB      ::= FOR COUNTER:c TO OPARIT:o saltoLinea SUBINSTRUC:s NEXT{::}
+;
+
+//Instrucciones de una función
+FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TIPO:t saltoLinea FUNCINSTRUC:f END FUNCTION {::}
+;
+
+//f!=null
+FUNCINSTRUC ::= DECLARACION:d FUNCINSTRUC:f {::} 
+                | saltoLinea FUNCINSTRUC
+                | EXIT FUNCTION FUNCINSTRUC:f {: :}
+                | ASIGN:a FUNCINSTRUC:f {: :}
+                | RETVAL:r FUNCINSTRUC:f {: :}
+                | CALL:c FUNCINSTRUC:f {: :}
+                | WRCONSOLE:w FUNCINSTRUC:f {: :}
+                | IFFUNC:i FUNCINSTRUC:f {: :}
+                | FORFUNC:ff FUNCINSTRUC:f {: :}
+                | DOWHILEFUNC:d FUNCINSTRUC:f {: :}
+                | {::}
+;
+
+IFFUNC      ::= IF CONDICION:c THEN M:m saltoLinea FUNCINSTRUC:f SIFFUNC:s END IF{::}
+;        
+
+SIFFUNC     ::= ELSEIF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s {::}
+                | ELSE saltoLinea FUNCINSTRUC:f SIFFUNC:s {::} 
+                | {::}
+;
+
+
+DOWHILEFUNC ::= DO WHILE CONDICION:c saltoLinea FUNCINSTRUC:f LOOP{::}
+;
+
+FORFUNC     ::= FOR COUNTER:c TO OPARIT:o saltoLinea FUNCINSTRUC:f NEXT{::}
+;
+
+RETVAL      ::= RETURN VAL:v {::}
+;
+
+VAL         ::= VALASIGN:v {::} 
+                | VALINT:v {::}
+;
+
+//Instrucciones del for
+COUNTER     ::= ASIGNINT:ai {::} 
+                | identificador:id AS INTEGERTYPE IGUAL OPARIT:op{::}
+;
+
+//llamado de funcion o sub procedure
+CALL        ::= identificador:i PARENTESISL PARAMCALL:p PARENTESISR {::}
+;                
+
+PARAMCALL   ::= VARCALL:v {::} 
+                | {::}
+;
+
+VARCALL     ::= VARCALL:v COMA VAL:val {::}
+                | VAL:v {::}
+;
+
+//gramática condiciones
+CONDICION   ::= CONDICION:c AND CONDICIONP:c1 {::}
+                | CONDICION:c OR CONDICIONP:c1 {::}
+                | NOT CONDICIONP:c {::}
+;
+CONDICION   ::= CONDICIONP:c {: :};
+
+CONDICIONP  ::= VALCOND:v OPCONDICION:o VALCOND:v2 {::};
+
+OPCONDICION ::= OPREL:o {: :} 
+                | IGUAL {: :}
+;              
+
+VALCOND     ::= VALASIGN:v {::}  
+                | VALINT:v {::} 
+;
+
+//gramática parámetros
+PARAMS      ::=  VARPARAMS:v {::} 
+                | {::}
+;
+
+VARPARAMS      ::= identificador:id AS TIPO:t COMA VARS2:v {::}
+                    | identificador:id COMA CANTVARS2:c COMA VARS2:v {::}
+                    | identificador:id COMA CANTVARS2:c {: :}
+                    | identificador:id AS TIPO:t {::}
+;
+
+VARS2           ::= CANTVARS2:c COMA VARS2:v {::}
+                    | CANTVARS2:c {::}                
+;
+
+CANTVARS2       ::= identificador:id COMA CANTVARS2:c {::}
+                    | identificador:id AS TIPO:t {::};
+
+//gramática asignacion
+ASIGN       ::= ASIGNOTRO:a {::}
+                | ASIGNINT:a {::}
+                | ASIGNSTRUC:a {::}; 
+
+ASIGNOTRO   ::= identificador:id IGUAL VALASIGN:v {::};
+
+ASIGNSTRUC  ::= LLAMADOSTRUC:l IGUAL VALASIGN:va {::} 
+                | LLAMADOSTRUC:l OPASING:o VALINT:v{::};
+
+VALASIGN    ::= STRING:str {::} 
+                | TRUE {::} 
+                | FALSE {::} 
+                | UNIRSTRNG:ustr {::} 
+                | READ {::} 
+;
+
+UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {::} 
+                | VALUNIRSTR:v CONCATSTRING VALUNIRSTR:v2 {::}
+;
+
+VALUNIRSTR  ::= STRING:str {::} | identificador:id {::};
+
+ASIGNINT    ::= identificador:id OPASING:o VALINT:v {::}
+;
+
+OPASING     ::= IGUAL {::} 
+                | OPMULTI:op IGUAL {::}  
+                | OPADICION:op IGUAL {::}  
+;
+
+VALINT      ::= OPARIT:o {::};
+
+//gramática operaciones aritméticas
+OPARIT      ::= OPARIT:o OPADICION:oPa OP:op {::} 
+                | OP:o {::} 
+;
+
+OP          ::= OP:o OPMULTI:oM OPP:op {::} 
+                | OPP:o {::} 
+;
+
+OPP         ::= INTEGER:i {::} 
+                | identificador:id {: :} 
+                | CALL:c {::}  
+                | PARENTESISL OPARIT:o PARENTESISR {::} 
+;
+
+//gramática declaración de variables
+DECLARACION ::= DIM T:t {::} 
+;
+
+T           ::= identificador:id AS TIPOIGUAL:t {::}
+                | identificador:id AS TIPO:t COMA VARS:v {::}
+                | identificador:id COMA CANTVARS:c COMA VARS:v {::}
+                | identificador:id COMA CANTVARS:c {: :}
+                | identificador:id AS TIPO:t {::}
+;
+
+VARS        ::= CANTVARS:c COMA VARS:v {::}
+                | CANTVARS:c {::}                
+;
+
+CANTVARS    ::= identificador:id COMA CANTVARS:c {::}
+                | identificador:id AS TIPO:t {::}
+;
+
+TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {::}
+                | STRINGTYPE IGUAL STRING:str {::}
+                | BOOLEANTYPE IGUAL TRUE {: :}
+                | BOOLEANTYPE IGUAL FALSE {::}
+                | STRINGTYPE IGUAL UNIRSTRNG:ustr {::}
+                |identificador:id IGUAL NEW CALL:c {: :}
+;
+
+TIPO        ::= INTEGERTYPE {: :} | STRINGTYPE {: :} | BOOLEANTYPE {: :} | identificador:id {:  :} ;
+
+//gramática escribir en consola
+WRCONSOLE   ::= WRITE PARENTESISL VALWR:v PARENTESISR {::}
+                
+;
+
+VALWR       ::= identificador:id {: :} 
+                | STRING:str {: :} 
+                | UNIRSTRNG:ustr {:  :}
+; 
+
+M           ::= {: :};

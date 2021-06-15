@@ -7,7 +7,9 @@ parser code
     public Nodo raiz;    
     public int cont = 0;
     public ArrayList<String> errores = new ArrayList<>();
-    public TablaSimbolos tablaSimbolos = new TablaSimbolos();    
+    public TablaSimbolos tablaSimbolos = new TablaSimbolos(); 
+    public int offset = 0;
+    public int cantVarsCreadas = 0;    
 
     public void syntax_error(Symbol s){
         errores.add("Syntax error: " +  s.value + " Linea: " + (s.left + 1) + " Columna: " + (s.right + 1));
@@ -25,6 +27,7 @@ nonterminal S;
 nonterminal Nodo MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFFUNC, SIFSUB, IFSUB, IFFUNC, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSUB, DOWHILESUB, FORFUNC, DOWHILEFUNC, COUNTER;
 nonterminal String VALUNIRSTR, TIPO, OPCONDICION;
 nonterminal Objeto CANTVARS, TIPOIGUAL, CANTVARS2, VARPARAMS, PARAMS, VARS2;
+nonterminal Marcador M;
 
 precedence left IGUAL;
 precedence left OPREL;
@@ -176,7 +179,11 @@ SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea
                         }
 
                         //agregar ambito y offset
-                        tablaSimbolos.agregarID(id,p.getTipo()+"->void","","");
+                        tablaSimbolos.agregarAmbito(id+".", cantVarsCreadas);
+
+                        tablaSimbolos.agregarID(id,p.getTipo()+"->void",0,"");
+                        offset = 0;                        
+                        cantVarsCreadas = 0;                                                
 
                         RESULT=node;
                 :}
@@ -269,9 +276,10 @@ SUBINSTRUC  ::= DECLARACION:d SUBINSTRUC:s {:
                     Nodo node = new Nodo("VACIO",parser.cont);
                     parser.cont++;                                   
                     RESULT = node;
-                :};
+                :}
+;
 
-IFSUB       ::= IF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 END IF {:
+IFSUB       ::= IF CONDICION:c THEN M:m saltoLinea SUBINSTRUC:s SIFSUB:s2 END IF {:
                     Nodo node = new Nodo("IF",parser.cont);
                     parser.cont++;
                     node.addHijo(c);
@@ -281,12 +289,17 @@ IFSUB       ::= IF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 END IF {:
                     if (s2 != null){
                         node.addHijo(s2);   
                     } 
+
+                    int cantVars = cantVarsCreadas - m.getNum();
+                    tablaSimbolos.agregarAmbito("IF.", cantVars);
+                    offset -= tablaSimbolos.disminuirOffset(cantVars);
+
                     RESULT = node;
                 :}
-                | IF error THEN saltoLinea SUBINSTRUC SIFSUB END IF {: errores.add("Error en codición del if"); :}
-                | IF CONDICION error saltoLinea SUBINSTRUC SIFSUB END IF {: errores.add("Se esperaba un THEN"); :}
-                | IF CONDICION THEN error SUBINSTRUC SIFSUB END IF {: errores.add("Se esperaba un salto de linea"); :}
-                | IF CONDICION THEN saltoLinea SUBINSTRUC SIFSUB END error {: errores.add("Se esperaba un IF"); :}
+                | IF error THEN M saltoLinea SUBINSTRUC SIFSUB END IF {: errores.add("Error en codición del if"); :}
+                | IF CONDICION error M saltoLinea SUBINSTRUC SIFSUB END IF {: errores.add("Se esperaba un THEN"); :}
+                | IF CONDICION THEN M error SUBINSTRUC SIFSUB END IF {: errores.add("Se esperaba un salto de linea"); :}
+                | IF CONDICION THEN M saltoLinea SUBINSTRUC SIFSUB END error {: errores.add("Se esperaba un IF"); :}
 ;
 
 SIFSUB      ::= ELSEIF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 {:
@@ -319,7 +332,6 @@ SIFSUB      ::= ELSEIF CONDICION:c THEN saltoLinea SUBINSTRUC:s SIFSUB:s2 {:
                 | ELSEIF CONDICION THEN error SUBINSTRUC SIFSUB {: errores.add("Se esperaba un salto de línea"); :}
                 | ELSE error SUBINSTRUC {: errores.add("Se esperaba un salto de línea"); :}
 ;
-
 
 DOWHILESUB  ::= DO WHILE CONDICION:c saltoLinea SUBINSTRUC:s LOOP{:
                             Nodo node = new Nodo("DO WHILE",parser.cont);
@@ -368,7 +380,11 @@ FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TI
                         }
 
                         //agregar ambito y offset
-                        tablaSimbolos.agregarID(id,p.getTipo()+"->"+t,"","");
+                        tablaSimbolos.agregarAmbito(id+".", cantVarsCreadas);
+
+                        tablaSimbolos.agregarID(id,p.getTipo()+"->"+t,0,"");
+                        offset = 0;                        
+                        cantVarsCreadas = 0;
 
                         RESULT=node;
                 :}
@@ -472,7 +488,7 @@ FUNCINSTRUC ::= DECLARACION:d FUNCINSTRUC:f {:
                 | error FUNCINSTRUC {: errores.add("Error desconocido"); :}       
 ;
 
-IFFUNC      ::= IF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s END IF{:
+IFFUNC      ::= IF CONDICION:c THEN M:m saltoLinea FUNCINSTRUC:f SIFFUNC:s END IF{:
                     Nodo node = new Nodo("IF",parser.cont);
                     parser.cont++;
                     node.addHijo(c);
@@ -482,12 +498,17 @@ IFFUNC      ::= IF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s END IF{:
                     if (s != null){
                         node.addHijo(s);
                     }                    
+
+                    int cantVars = cantVarsCreadas - m.getNum();
+                    tablaSimbolos.agregarAmbito("IF.", cantVars); 
+                    offset -= tablaSimbolos.disminuirOffset(cantVars);
+
                     RESULT = node;
                 :}
-                | IF error THEN saltoLinea FUNCINSTRUC SIFFUNC END IF {: errores.add("Error en codición del if"); :}
-                | IF CONDICION error saltoLinea FUNCINSTRUC SIFFUNC END IF {: errores.add("Se esperaba un THEN"); :}
-                | IF CONDICION THEN error FUNCINSTRUC SIFFUNC END IF {: errores.add("Se esperaba un salto de linea"); :}
-                | IF CONDICION THEN saltoLinea FUNCINSTRUC SIFFUNC END error {: errores.add("Se esperaba un IF"); :} 
+                | IF error THEN M saltoLinea FUNCINSTRUC SIFFUNC END IF {: errores.add("Error en codición del if"); :}
+                | IF CONDICION error M saltoLinea FUNCINSTRUC SIFFUNC END IF {: errores.add("Se esperaba un THEN"); :}
+                | IF CONDICION THEN M error FUNCINSTRUC SIFFUNC END IF {: errores.add("Se esperaba un salto de linea"); :}
+                | IF CONDICION THEN M saltoLinea FUNCINSTRUC SIFFUNC END error {: errores.add("Se esperaba un IF"); :} 
 ;        
 
 SIFFUNC     ::= ELSEIF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s {:
@@ -499,8 +520,9 @@ SIFFUNC     ::= ELSEIF CONDICION:c THEN saltoLinea FUNCINSTRUC:f SIFFUNC:s {:
                     }
                     if (s != null){
                         node.addHijo(s);
-                    }                    
-                    RESULT = node;
+                    }             
+
+                    RESULT = node;                    
                 :}
                 | ELSE saltoLinea FUNCINSTRUC:f SIFFUNC:s {:
                     Nodo node = new Nodo("ELSE",parser.cont);
@@ -562,14 +584,16 @@ RETVAL      ::= RETURN VAL:v {:
                     parser.cont++;
                     node.addHijo(v);
                     RESULT = node;
-                :};
+                :}
+;
 
 VAL         ::= VALASIGN:v {:
                     RESULT=v;
                 :} 
                 | VALINT:v {:
                     RESULT=v;
-                :};
+                :}
+;
 
 //Instrucciones del for
 COUNTER     ::= ASIGNINT:ai {:
@@ -692,7 +716,12 @@ VARPARAMS      ::= identificador:id AS TIPO:t COMA VARS2:v {:
                         parser.cont++;
                         node.addHijo(v.getNodo());
 
+                        tablaSimbolos.agregarID(id,t,offset,"");
+
                         Objeto retVal = new Objeto(node, t+v.getAcumulada());
+                        offset += tablaSimbolos.sizeUltimo();
+                        cantVarsCreadas += 1;
+
                         RESULT = retVal;
                     :}
                     |identificador:id COMA CANTVARS2:c COMA VARS2:v {:
@@ -703,7 +732,12 @@ VARPARAMS      ::= identificador:id AS TIPO:t COMA VARS2:v {:
                         node.addHijo(c.getNodo());
                         node.addHijo(v.getNodo());
 
+                        tablaSimbolos.agregarID(id,c.getTipo(),offset,""); 
+
                         Objeto retVal = new Objeto(node, c.getTipo()+c.getAcumulada()+v.getAcumulada());
+                        offset += tablaSimbolos.sizeUltimo();
+                        cantVarsCreadas += 1;
+
                         RESULT = retVal;
                     :}
                     | identificador:id COMA CANTVARS2:c {: 
@@ -713,7 +747,12 @@ VARPARAMS      ::= identificador:id AS TIPO:t COMA VARS2:v {:
                         parser.cont++;
                         node.addHijo(c.getNodo());
 
+                        tablaSimbolos.agregarID(id,c.getTipo(),offset,""); 
+
                         Objeto retVal = new Objeto(node, c.getTipo()+ c.getAcumulada());
+                        offset += tablaSimbolos.sizeUltimo();
+                        cantVarsCreadas += 1;
+
                         RESULT = retVal;
                     :}
                     | identificador:id AS TIPO:t {:
@@ -724,7 +763,12 @@ VARPARAMS      ::= identificador:id AS TIPO:t COMA VARS2:v {:
                         node.addHijo(new Nodo(t,parser.cont));
                         parser.cont++;
 
+                        tablaSimbolos.agregarID(id,t,offset,""); 
+
                         Objeto retVal = new Objeto(node,t); 
+                        offset += tablaSimbolos.sizeUltimo();
+                        cantVarsCreadas += 1;
+
                         RESULT = retVal;
                     :}
 ;
@@ -750,7 +794,12 @@ CANTVARS2       ::= identificador:id COMA CANTVARS2:c {:
                         parser.cont++;
                         node.addHijo(c.getNodo());
 
-                        Objeto retVal = new Objeto(node, c.getTipo(),"x"+c.getTipo()+c.getAcumulada());                    
+                        tablaSimbolos.agregarID(id,c.getTipo(),offset,"");
+                        offset += tablaSimbolos.sizeUltimo();
+                        cantVarsCreadas += 1;
+
+                        Objeto retVal = new Objeto(node, c.getTipo(),"x"+c.getTipo()+c.getAcumulada());                                                    
+
                         RESULT=retVal;   
                     :}
                     | identificador:id AS TIPO:t {:
@@ -760,8 +809,13 @@ CANTVARS2       ::= identificador:id COMA CANTVARS2:c {:
                         parser.cont++;           
                         node.addHijo(new Nodo(t,parser.cont));
                         parser.cont++;
+                        
+                        tablaSimbolos.agregarID(id,t,offset,"");
+                        offset += tablaSimbolos.sizeUltimo();
+                        cantVarsCreadas += 1;
 
-                        Objeto retVal = new Objeto(node, t,"x"+t);                                  
+                        Objeto retVal = new Objeto(node, t,"x"+t);                                                          
+
                         RESULT=retVal;
                     :};
 
@@ -935,7 +989,9 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     node.addHijo(t.getNodo());
 
                     //agregar ambito y offset
-                    tablaSimbolos.agregarID(id,t.getTipo(),"","");
+                    tablaSimbolos.agregarID(id,t.getTipo(),offset,"");
+                    offset += tablaSimbolos.sizeUltimo();
+                    cantVarsCreadas += 1;
                     
                     RESULT = node;
                 :}
@@ -949,7 +1005,9 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     node.addHijo(v);
 
                     //agregar ambito y offset
-                    tablaSimbolos.agregarID(id,t,"","");
+                    tablaSimbolos.agregarID(id,t,offset,"");
+                    offset += tablaSimbolos.sizeUltimo();
+                    cantVarsCreadas += 1;
 
                     RESULT = node;
                 :}
@@ -962,7 +1020,9 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     node.addHijo(v);
 
                     //agregar ambito y offset
-                    tablaSimbolos.agregarID(id,c.getTipo(),"","");
+                    tablaSimbolos.agregarID(id,c.getTipo(),offset,"");
+                    offset += tablaSimbolos.sizeUltimo();
+                    cantVarsCreadas += 1;
 
                     RESULT = node;
                 :}
@@ -974,7 +1034,9 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     node.addHijo(c.getNodo());
 
                     //agregar ambito y offset
-                    tablaSimbolos.agregarID(id,c.getTipo(),"","");
+                    tablaSimbolos.agregarID(id,c.getTipo(),offset,"");
+                    offset += tablaSimbolos.sizeUltimo();
+                    cantVarsCreadas += 1;
 
                     RESULT = node;
                 :}
@@ -987,7 +1049,9 @@ T           ::= identificador:id AS TIPOIGUAL:t {:
                     parser.cont++;
 
                     //agregar ambito y offset
-                    tablaSimbolos.agregarID(id,t,"","");  
+                    tablaSimbolos.agregarID(id,t,offset,"");
+                    offset += tablaSimbolos.sizeUltimo();  
+                    cantVarsCreadas += 1;
 
                     RESULT = node;
                 :}
@@ -1010,12 +1074,14 @@ CANTVARS    ::= identificador:id COMA CANTVARS:c {:
                     parser.cont++;
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
-                    node.addHijo(c.getNodo());
+                    node.addHijo(c.getNodo());                    
 
-                    //agregar ambito y offset
-                    tablaSimbolos.agregarID(id,c.getTipo(),"","");
+                    tablaSimbolos.agregarID(id,c.getTipo(),offset,"");
 
                     Objeto retVal = new Objeto(node, c.getTipo());                    
+                    offset += tablaSimbolos.sizeUltimo();
+                    cantVarsCreadas += 1;
+                    
                     RESULT=retVal;  
                 :}
                 | identificador:id AS TIPO:t {:
@@ -1024,12 +1090,14 @@ CANTVARS    ::= identificador:id COMA CANTVARS:c {:
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;           
                     node.addHijo(new Nodo(t,parser.cont));
-                    parser.cont++;
+                    parser.cont++;             
 
-                    //agregar ambito y offset
-                    tablaSimbolos.agregarID(id,t,"","");
+                    tablaSimbolos.agregarID(id,t,offset,"");       
 
                     Objeto retVal = new Objeto(node, t);                                  
+                    offset += tablaSimbolos.sizeUltimo();
+                    cantVarsCreadas += 1;
+
                     RESULT=retVal;
                 :}
 ;
@@ -1132,3 +1200,5 @@ VALWR       ::= identificador:id {:
                     RESULT=ustr; 
                 :} 
                 | error {: errores.add("Se esperaba un String"); :};
+
+M           ::= {: RESULT=new Marcador(cantVarsCreadas); :};

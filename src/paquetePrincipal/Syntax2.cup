@@ -24,7 +24,7 @@ parser code
 terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
 
-nonterminal S, MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, DECLARACION, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, STATEMENTS,STRUCTUREDECLA, ASIGNSTRUC, COUNTER, TIPOIGUAL, VARPARAMS, PARAMS,M,VALUNIRSTR, OPCONDICION, T, FORSTATEMENT, DOWHILESTATE;
+nonterminal S, MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, DECLARACION, CALL, PARAMCALL, VARCALL, OPASIGN, ASIGN, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, STATEMENTS,STRUCTUREDECLA, COUNTER, VARPARAMS, PARAMS,M,VALUNIRSTR, OPCONDICION, T, FORSTATEMENT, DOWHILESTATE, VALOR;
 nonterminal String TIPO, CANTVARS, VARS, CANTVARS2, VARS2;
 
 precedence left IGUAL;
@@ -47,26 +47,12 @@ MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:
                 :}
                 | FUNC:f MDLINSTRUC:md {:                    
                 :}
-                | SUBPROCE:s MDLINP:md {:                    
+                | SUBPROCE:s MDLINSTRUC:md {:                    
                 :}
                 | STRUCTUREDECLA:sd MDLINSTRUC:md {:                    
                     
                 :}
-;
-
-MDLINP      ::= DECLARACION:d MDLINP:m {:                
-                :}
-                | saltoLinea MDLINP:m {:     
-                :}
-                | SUBPROCE:s MDLINP:m {:
-
-                :}
-                | FUNC:f MDLINP:m {:
-                :}
-                | STRUCTUREDECLA:sd MDLINP:m {:
-                :} 
-                | saltoLinea {:
-                :}
+                | saltoLinea
 ;
 
 //Intrucciones de una Structure
@@ -174,19 +160,15 @@ SIFSTATEMENT ::= ELSEIF CONDICION:c THEN saltoLinea STATEMENTS:s SIFSTATEMENT:s2
 DOWHILESTATE  ::= DO WHILE CONDICION:c saltoLinea STATEMENTS:s LOOP{::}
 ;
 
-FORSTATEMENT  ::= FOR COUNTER:c TO OPARIT:o saltoLinea STATEMENTS:s NEXT{::}
+FORSTATEMENT  ::= FOR COUNTER:c TO VALOR:v saltoLinea STATEMENTS:s NEXT{::}
 ;
 
-RETVAL      ::= RETURN VAL:v {::}
-;
-
-VAL         ::= VALASIGN:v {::} 
-                | VALINT:v {::}
+RETVAL      ::= RETURN VALOR:v {::}
 ;
 
 //Instrucciones del for
-COUNTER     ::= ASIGNINT:ai {::} 
-                | identificador:id AS INTEGERTYPE IGUAL OPARIT:op{::}
+COUNTER     ::= identificador:id OPASIGN:o VALOR:v {::} 
+                | identificador:id AS INTEGERTYPE IGUAL VALOR:v{::}
 ;
 
 //llamado de funcion o sub procedure
@@ -197,46 +179,28 @@ PARAMCALL   ::= VARCALL:v {::}
                 | {::}
 ;
 
-VARCALL     ::= VARCALL:v COMA VAL:val {::}
-                | VAL:v {::}
+VARCALL     ::= VARCALL:v COMA VALOR:val {::}
+                | VALOR:v {::}
 ;
 
 //gramática condiciones
 CONDICION   ::= CONDICION:c AND CONDICIONP:c1 {::}
                 | CONDICION:c OR CONDICIONP:c1 {::}
                 | NOT CONDICIONP:c {::}
+                | CONDICIONP:c {: :}
 ;
-CONDICION   ::= CONDICIONP:c {: :};
 
-CONDICIONP  ::= VALCOND:v OPCONDICION:o VALCOND:v2 {::};
+CONDICIONP  ::= VALOR:v OPCONDICION:o VALOR:v2 {::};
 
 OPCONDICION ::= OPREL:o {: :} 
                 | IGUAL {: :}
 ;              
 
-VALCOND     ::= VALASIGN:v {::}  
-                | VALINT:v {::} 
-;
-
 //gramática asignacion
-ASIGN       ::= ASIGNOTRO:a {::}
-                | ASIGNINT:a {::}
-                | ASIGNSTRUC:a {::}
+ASIGN       ::= identificador:id OPASIGN:o VALOR:v {::}
+                | identificador:id IGUAL READ {::}
+                | LLAMADOSTRUC:l OPASIGN:o VALOR:v {::}
 ; 
-
-ASIGNOTRO   ::= identificador:id IGUAL VALASIGN:v {::}
-;
-
-ASIGNSTRUC  ::= LLAMADOSTRUC:l IGUAL VALASIGN:va {::} 
-                | LLAMADOSTRUC:l OPASING:o VALINT:v{::}
-;
-
-VALASIGN    ::= STRING:str {::} 
-                | TRUE {::} 
-                | FALSE {::} 
-                | UNIRSTRNG:ustr {::} 
-                | READ {::} 
-;
 
 UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {::} 
                 | VALUNIRSTR:v CONCATSTRING VALUNIRSTR:v2 {::}
@@ -244,35 +208,36 @@ UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {::}
 
 VALUNIRSTR  ::= STRING:str {::} | identificador:id {::};
 
-ASIGNINT    ::= identificador:id OPASING:o VALINT:v {::}
-;
-
-OPASING     ::= IGUAL {::} 
+OPASIGN     ::= IGUAL {::} 
                 | OPMULTI:op IGUAL {::}  
                 | OPADICION:op IGUAL {::}  
 ;
 
-VALINT      ::= OPARIT:o {::};
-
 //gramática operaciones aritméticas
-OPARIT      ::= OPARIT:o OPADICION:oPa OP:op {::} 
-                | OP:o {::} 
+OPARIT      ::= OPARIT:o OPADICION:oPa VALOR:v {::} 
+                | OPARIT:o OPMULTI:oM VALOR:v {::}
+                | PARENTESISL OPARIT:o PARENTESISR {: :} 
+                | VALOR:v OPADICION:oPa VALOR:v2 {::}
+                | VALOR:v OPMULTI:oM VALOR:v2 {::}
 ;
 
-OP          ::= OP:o OPMULTI:oM OPP:op {::} 
-                | OPP:o {::} 
-;
-
-OPP         ::= INTEGER:i {::} 
-                | identificador:id {: :} 
-                | CALL:c {::}  
-                | PARENTESISL OPARIT:o PARENTESISR {::} 
+VALOR       ::= INTEGER:i {::}
+                | STRING:str  {::}
+                | TRUE {::}
+                | FALSE {::}
+                | NEW CALL:c {::}
+                | CALL:c {::}
+                | UNIRSTRNG:ustr {::}
+                | identificador:id {:
+                    //buscar id y asignarle ese el tipo a Objeto
+                    :}
+                | OPARIT:o {::}
 ;
 
 //gramática declaración de variables
 DECLARACION ::= DIM T;
 
-T           ::= identificador:id AS TIPOIGUAL:t {::}
+T           ::= identificador:id AS TIPO:t IGUAL VALOR {::}
                 | identificador:id AS TIPO:t COMA VARS:v {:
                     int posSimbolo = tablaSimbolos.buscarSimbolo(id,t);
                     boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
@@ -325,13 +290,6 @@ CANTVARS    ::= identificador:id COMA CANTVARS:c {:
                 :}
 ;
 
-TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {::}
-                | STRINGTYPE IGUAL STRING:str {::}
-                | BOOLEANTYPE IGUAL TRUE {: :}
-                | BOOLEANTYPE IGUAL FALSE {::}
-                | STRINGTYPE IGUAL UNIRSTRNG:ustr {::}
-                | identificador:id IGUAL NEW CALL:c {: :}
-;
 
 TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRING"; :} | BOOLEANTYPE {: RESULT="BOOLEAN"; :} | identificador:id {: RESULT=id; :} ;
 

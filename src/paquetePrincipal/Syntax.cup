@@ -23,9 +23,9 @@ terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, A
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
 
 nonterminal S;
-nonterminal Nodo STATEMENTS,MDLINSTRUC, MDLINP, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, VARS, DECLARACION, T, OPP, OP, CALL, PARAMCALL, VARCALL, VAL, VALASIGN, VALINT, OPASING, ASIGN, ASIGNINT, ASIGNOTRO, VALCOND, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, ASIGNSTRUC, FORSTATEMENT, DOWHILESTATE, COUNTER;
+nonterminal Nodo STATEMENTS,MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, VARS, DECLARACION, T, PARAMCALL, VARCALL, OPASIGN, ASIGN, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, FORSTATEMENT, DOWHILESTATE, COUNTER;
 nonterminal String VALUNIRSTR, TIPO, OPCONDICION;
-nonterminal Objeto CANTVARS, TIPOIGUAL, CANTVARS2, VARPARAMS, PARAMS, VARS2;
+nonterminal Objeto CANTVARS, CANTVARS2, VARPARAMS, PARAMS, VARS2, VALOR, CALL;
 nonterminal Marcador M;
 
 precedence left IGUAL;
@@ -62,7 +62,9 @@ MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:
                     RESULT=node;
                 :}
                 | saltoLinea MDLINSTRUC:md {:
-                    RESULT = md;
+                    if (md != null){
+                        RESULT=md;
+                    }
                 :}
                 | FUNC:f MDLINSTRUC:md {:                    
                     Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
@@ -71,7 +73,7 @@ MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:
                     node.addHijo(md);
                     RESULT=node;
                 :}
-                | SUBPROCE:s MDLINP:md {:                    
+                | SUBPROCE:s MDLINSTRUC:md {:                    
                     Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
                     parser.cont++;
                     node.addHijo(s);
@@ -85,49 +87,6 @@ MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:
                     node.addHijo(md);
                     RESULT=node;
                 :}
-;
-
-MDLINP      ::= DECLARACION:d MDLINP:m {:
-                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
-                    parser.cont++;
-                    node.addHijo(d);
-                    if (m != null){
-                        node.addHijo(m);
-                    }                    
-                    RESULT=node;
-                :}
-                | saltoLinea MDLINP:m {:
-                    if (m != null){
-                        RESULT=m;
-                    }
-                :}
-                | SUBPROCE:s MDLINP:m {:
-                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
-                    parser.cont++;
-                    node.addHijo(s);
-                    if (m != null){
-                        node.addHijo(m);
-                    }                    
-                    RESULT=node;
-                :}
-                | FUNC:f MDLINP:m {:
-                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
-                    parser.cont++;
-                    node.addHijo(f);
-                    if (m != null){
-                        node.addHijo(m);
-                    }                    
-                    RESULT=node;
-                :}
-                | STRUCTUREDECLA:sd MDLINP:m {:
-                    Nodo node = new Nodo("MODULE INSTRUCTIONS",parser.cont);
-                    parser.cont++;
-                    node.addHijo(sd);
-                    if (m != null){
-                        node.addHijo(m);
-                    }                    
-                    RESULT=node;
-                :} 
                 | saltoLinea {:
                     Nodo node = new Nodo("VACIO",parser.cont);
                     parser.cont++;                                   
@@ -408,7 +367,7 @@ STATEMENTS  ::= DECLARACION:d STATEMENTS:s {:
                 | CALL:c STATEMENTS:s {:
                     Nodo node = new Nodo("STATEMETNS",parser.cont);
                     parser.cont++;
-                    node.addHijo(c);
+                    node.addHijo(c.getNodo());
                     if (s != null){
                         node.addHijo(s);
                     }                    
@@ -529,65 +488,61 @@ DOWHILESTATE  ::= DO WHILE CONDICION:c saltoLinea STATEMENTS:s LOOP{:
                 | DO WHILE CONDICION error STATEMENTS LOOP {: errores.add("Se esperaba un salto de linea"); :}           
 ;
 
-FORSTATEMENT  ::= FOR COUNTER:c TO OPARIT:o saltoLinea STATEMENTS:s NEXT{:
+FORSTATEMENT  ::= FOR COUNTER:c TO VALOR:v saltoLinea STATEMENTS:s NEXT{:
                             Nodo node = new Nodo("FOR",parser.cont);
                             parser.cont++;
                             node.addHijo(c);
-                            node.addHijo(o);
+                            node.addHijo(v.getNodo());
                             if (s != null){
                                 node.addHijo(s);
                             }
                             RESULT = node;
                 :}
-                | error COUNTER TO OPARIT saltoLinea STATEMENTS NEXT {: errores.add("Se esperaba un FOR"); :}
-                | FOR error TO OPARIT saltoLinea STATEMENTS NEXT {: errores.add("Error en la asignacion del contador del for"); :}
-                | FOR COUNTER error OPARIT saltoLinea STATEMENTS NEXT {: errores.add("Se esperaba un TO"); :}
-                | FOR COUNTER TO OPARIT error STATEMENTS NEXT {: errores.add("Se esperaba un salto de linea"); :}
+                | error COUNTER TO VALOR saltoLinea STATEMENTS NEXT {: errores.add("Se esperaba un FOR"); :}
+                | FOR error TO VALOR saltoLinea STATEMENTS NEXT {: errores.add("Error en la asignacion del contador del for"); :}
+                | FOR COUNTER error VALOR saltoLinea STATEMENTS NEXT {: errores.add("Se esperaba un TO"); :}
+                | FOR COUNTER TO VALOR error STATEMENTS NEXT {: errores.add("Se esperaba un salto de linea"); :}
 ;
 
-RETVAL      ::= RETURN VAL:v {:
+RETVAL      ::= RETURN VALOR:v {:
                     Nodo node = new Nodo("RETURN",parser.cont);
                     parser.cont++;
-                    node.addHijo(v);
+                    node.addHijo(v.getNodo());
                     RESULT = node;
                 :}
 ;
 
-VAL         ::= VALASIGN:v {:
-                    RESULT=v;
-                :} 
-                | VALINT:v {:
-                    RESULT=v;
-                :}
-;
-
 //Instrucciones del for
-COUNTER     ::= ASIGNINT:ai {:
-                    RESULT=ai;
+COUNTER     ::= identificador:id OPASIGN:o VALOR:v {:
+                    o.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    o.addHijo(v.getNodo());
+                    RESULT = o;
                 :} 
-                | identificador:id AS INTEGERTYPE IGUAL OPARIT:op{:
+                | identificador:id AS INTEGERTYPE IGUAL VALOR:v{:
                             Nodo node = new Nodo("=",parser.cont);
                             parser.cont++;
                             node.addHijo(new Nodo(id,parser.cont));
                             parser.cont++;
                             node.addHijo(new Nodo("INTEGER",parser.cont));
                             parser.cont++;
-                            node.addHijo(op);
+                            node.addHijo(v.getNodo());
                             RESULT = node;
                 :}
-                         | error AS INTEGERTYPE IGUAL OPARIT {: errores.add("Se esperaba un identificador"); :}
+                | error AS INTEGERTYPE IGUAL VALOR {: errores.add("Se esperaba un identificador"); :}
 ;
 
 //llamado de funcion o sub procedure
-CALL        ::= identificador:i PARENTESISL PARAMCALL:p PARENTESISR {:
+CALL        ::= identificador:id PARENTESISL PARAMCALL:p PARENTESISR {:
                     Nodo node = new Nodo("FUNCTION CALL",parser.cont);
                     parser.cont++;
-                    node.addHijo(new Nodo(i,parser.cont));
+                    node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
                     if (p != null){
                         node.addHijo(p);
-                    }                    
-                    RESULT = node;
+                    }      
+                    Objeto retVal = new Objeto(node,id);              
+                    RESULT = retVal;
                 :}
                 | error PARENTESISL PARAMCALL PARENTESISR {: errores.add("Se esperaba identificador"); :}
 ;                
@@ -602,15 +557,15 @@ PARAMCALL   ::= VARCALL:v {:
                 :}
 ;
 
-VARCALL     ::= VARCALL:v COMA VAL:val {:
+VARCALL     ::= VARCALL:v COMA VALOR:val {:
                     Nodo node = new Nodo("VARCALL",parser.cont);
                     parser.cont++;
                     node.addHijo(v);
-                    node.addHijo(val);
+                    node.addHijo(val.getNodo());
                     RESULT = node;
                 :}
-                | VAL:v {:
-                    RESULT = v;
+                | VALOR:v {:
+                    RESULT = v.getNodo();
                 :}
                 | VARCALL error {: errores.add("Error en parametros"); :}
 ;
@@ -636,15 +591,16 @@ CONDICION   ::= CONDICION:c AND CONDICIONP:c1 {:
                     node.addHijo(c);
                     RESULT=node;
                 :}
+                | CONDICIONP:c {: 
+                    RESULT = c; 
+                :}
 ;
 
-CONDICION   ::= CONDICIONP:c {: RESULT = c; :};
-
-CONDICIONP  ::= VALCOND:v OPCONDICION:o VALCOND:v2 {:
+CONDICIONP  ::= VALOR:v OPCONDICION:o VALOR:v2 {:
                     Nodo node = new Nodo(o,parser.cont);
                     parser.cont++;
-                    node.addHijo(v);
-                    node.addHijo(v2);
+                    node.addHijo(v.getNodo());
+                    node.addHijo(v2.getNodo());
                     RESULT = node;
                 :}
 ;
@@ -657,77 +613,29 @@ OPCONDICION ::= OPREL:o {:
                 :}
 ;              
 
-VALCOND     ::= VALASIGN:v {:
-                    RESULT=v;
-                :}  
-                | VALINT:v {:
-                    RESULT=v;
-                :} 
-;
-
-
 //gramática asignacion
-ASIGN       ::= ASIGNOTRO:a {:
-                    RESULT = a;
+ASIGN       ::= identificador:id OPASIGN:o VALOR:v {:
+                    o.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    o.addHijo(v.getNodo());
+                    RESULT=o;
                 :}
-                | ASIGNINT:a {:
-                    RESULT = a;
-                :}
-                | ASIGNSTRUC:a {:
-                    RESULT = a;
-                :}
-; 
-
-ASIGNOTRO   ::= identificador:id IGUAL VALASIGN:v {:
+                | identificador:id IGUAL READ {:
                     Nodo node = new Nodo("=",parser.cont);
                     parser.cont++;
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
-                    node.addHijo(v);
-                    RESULT=node;
-                :}
-;
-
-ASIGNSTRUC  ::= LLAMADOSTRUC:l IGUAL VALASIGN:va {:
-                    Nodo node = new Nodo("=",parser.cont);
-                    parser.cont++;
-                    node.addHijo(new Nodo(l,parser.cont));
-                    parser.cont++;
-                    node.addHijo(va);
-                    RESULT=node;
-                :} 
-                | LLAMADOSTRUC:l OPASING:o VALINT:v{:
-                    o.addHijo(new Nodo(l,parser.cont));                    
-                    parser.cont++;                
-                    o.addHijo(v);
-                    RESULT=o;
-                :}
-;
-
-VALASIGN    ::= STRING:str {:
-                    Nodo node = new Nodo(str.substring(1,str.length()-1),parser.cont);
-                    parser.cont++;
-                    RESULT=node;
-                :} 
-                | TRUE {:
-                    Nodo node = new Nodo("TRUE",parser.cont);
-                    parser.cont++;
-                    RESULT=node;
-                :} 
-                | FALSE {:
-                    Nodo node = new Nodo("FALSE",parser.cont);
-                    parser.cont++;
-                    RESULT=node;
-                :} 
-                | UNIRSTRNG:ustr {:
-                    RESULT=ustr;
-                :} 
-                | READ {:
-                    Nodo node = new Nodo("read console",parser.cont);
+                    node.addHijo(new Nodo("read.console",parser.cont));
                     parser.cont++;
                     RESULT = node;
                 :}
-;
+                | LLAMADOSTRUC:l OPASIGN:o VALOR:v {:
+                    o.addHijo(new Nodo(l,parser.cont));                    
+                    parser.cont++;                
+                    o.addHijo(v.getNodo());
+                    RESULT=o;
+                :}
+; 
 
 UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
                     Nodo node = new Nodo("&",parser.cont);
@@ -750,17 +658,7 @@ UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
 
 VALUNIRSTR  ::= STRING:str {: RESULT=str.substring(1,str.length()-1); :} | identificador:id {:RESULT=id;:} | error {: errores.add("Se esperaba un valor String"); :};
 
-ASIGNINT    ::= identificador:id OPASING:o VALINT:v {:
-                    o.addHijo(new Nodo(id,parser.cont));
-                    parser.cont++;
-                    o.addHijo(v);
-                    RESULT = o;
-                :}
-                | identificador error VALINT {: errores.add("Error en asignación"); :}
-                | error OPASING VALINT {: errores.add("Error en asignación"); :}
-;
-
-OPASING     ::= IGUAL {:
+OPASIGN     ::= IGUAL {:
                     Nodo node = new Nodo("=",parser.cont);
                     parser.cont++;
                     RESULT=node;
@@ -777,53 +675,85 @@ OPASING     ::= IGUAL {:
                 :}  
 ;
 
-VALINT      ::= OPARIT:o {:
-                    RESULT = o;
-                :}
-;
-
 //gramática operaciones aritméticas
-OPARIT      ::= OPARIT:o OPADICION:oPa OP:op {:                     
+OPARIT      ::= OPARIT:o OPADICION:oPa VALOR:v {:                     
                     Nodo node = new Nodo(oPa,parser.cont); 
                     parser.cont++;
                     node.addHijo(o);
-                    node.addHijo(op);
+                    node.addHijo(v.getNodo());
                     RESULT = node;                  
                 :} 
-                | OP:o {:                     
-                    RESULT = o;                    
-                :} 
-;
-
-OP          ::= OP:o OPMULTI:oM OPP:op {: 
+                | OPARIT:o OPMULTI:oM VALOR:v {:                     
                     Nodo node = new Nodo(oM,parser.cont); 
                     parser.cont++;
                     node.addHijo(o);
-                    node.addHijo(op);
-                    RESULT = node;                    
-                :} 
-                | OPP:o {:                     
-                    RESULT = o;                    
-                :} 
-;
-
-OPP         ::= INTEGER:i {: 
-                    Nodo node = new Nodo(i,parser.cont); 
-                    parser.cont++;
-                    RESULT = node;                    
-                :} 
-                | identificador:id {: 
-                    Nodo node = new Nodo(id,parser.cont); 
-                    parser.cont++;
-                    RESULT = node;                    
-                :} 
-                | CALL:c {: 
-                    RESULT = c;                    
-                :}  
+                    node.addHijo(v.getNodo());
+                    RESULT = node;                 
+                :}
                 | PARENTESISL OPARIT:o PARENTESISR {: 
                     RESULT = o;                    
                 :} 
-                | error {: errores.add("Error en operación con Integer"); :}
+                | VALOR:v OPADICION:oPa VALOR:v2 {:
+                    Nodo node = new Nodo(oPa,parser.cont); 
+                    parser.cont++;
+                    node.addHijo(v.getNodo());
+                    node.addHijo(v2.getNodo());
+                    RESULT = node; 
+                :}
+                | VALOR:v OPMULTI:oM VALOR:v2 {:
+                    Nodo node = new Nodo(oM,parser.cont); 
+                    parser.cont++;
+                    node.addHijo(v.getNodo());
+                    node.addHijo(v2.getNodo());
+                    RESULT = node;
+                :}
+;
+
+VALOR       ::= INTEGER:i {:
+                    Nodo node = new Nodo(i,parser.cont);
+                    parser.cont++;
+                    Objeto retVal = new Objeto(node,"INTEGER");
+                    RESULT = retVal;
+                :}
+                | STRING:str  {:
+                    Nodo node = new Nodo(str.substring(1,str.length()-1),parser.cont);
+                    parser.cont++;
+                    Objeto retVal = new Objeto(node,"STRING");
+                    RESULT = retVal;
+                :}
+                | TRUE {:
+                    Nodo node = new Nodo("TRUE",parser.cont);
+                    parser.cont++;
+                    Objeto retVal = new Objeto(node,"BOOLEAN");
+                    RESULT = retVal;
+                :}
+                | FALSE {:
+                    Nodo node = new Nodo("TRUE",parser.cont);
+                    parser.cont++;
+                    Objeto retVal = new Objeto(node,"BOOLEAN");
+                    RESULT = retVal;
+                :}
+                | NEW CALL:c {:
+                    RESULT=c;
+                :}
+                | CALL:c {:
+                    RESULT=c;
+                :}
+                | UNIRSTRNG:ustr {:
+                    Objeto retVal = new Objeto(ustr,"STRING");
+                    RESULT = retVal;
+                :}
+                | identificador:id {:
+                    //buscar id y asignarle ese el tipo a Objeto
+                    Nodo node = new Nodo(id,parser.cont);
+                    parser.cont++;
+                    Objeto retVal = new Objeto(node,"POR_DETERMINAR");
+                    RESULT = retVal;
+                :}
+                | OPARIT:o {:
+                    Objeto retVal = new Objeto(o,"INTEGER");
+                    RESULT = retVal;
+                :}
 ;
 
 //gramática declaración de variables
@@ -833,15 +763,17 @@ DECLARACION ::= DIM T:t {:
                 | DIM error {: errores.add("Error en declaración"); :}
 ;
 
-T           ::= identificador:id AS TIPOIGUAL:t {:
+T           ::= identificador:id AS TIPO:t IGUAL VALOR:v {:
                     Nodo node = new Nodo("DECLARACION",parser.cont);
                     parser.cont++;
                     node.addHijo(new Nodo(id,parser.cont));
                     parser.cont++;
-                    node.addHijo(t.getNodo());
-
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+                    node.addHijo(v.getNodo());
+                    
                     //agregar ambito y offset
-                    tablaSimbolos.agregarID(id,t.getTipo(),offset,"");
+                    tablaSimbolos.agregarID(id,t,offset,"");
                     offset += tablaSimbolos.sizeUltimo();
                     cantVarsCreadas += 1;
                     
@@ -950,77 +882,6 @@ CANTVARS    ::= identificador:id COMA CANTVARS:c {:
                     offset += tablaSimbolos.sizeUltimo();
                     cantVarsCreadas += 1;
 
-                    RESULT=retVal;
-                :}
-;
-
-TIPOIGUAL   ::= INTEGERTYPE IGUAL OPARIT:o  {:
-                    Nodo node = new Nodo("=",parser.cont);
-                    parser.cont++;
-                    node.addHijo(new Nodo("INTEGER",parser.cont));
-                    parser.cont++;
-                    node.addHijo(o);
-
-                    //ojo oparit el valor
-                    Objeto retVal = new Objeto(node,"INTEGER");
-                    RESULT=retVal;                    
-                :}
-                | STRINGTYPE IGUAL STRING:str {:
-                    Nodo node = new Nodo("=",parser.cont);
-                    parser.cont++;
-                    node.addHijo(new Nodo("STRING",parser.cont));
-                    parser.cont++;
-                    node.addHijo(new Nodo(str.substring(1,str.length()-1),parser.cont));
-                    parser.cont++;
-
-                    //ojo str el valor
-                    Objeto retVal = new Objeto(node,"STRING");
-                    RESULT=retVal; 
-                :}
-                | BOOLEANTYPE IGUAL TRUE {:
-                    Nodo node = new Nodo("=",parser.cont);
-                    parser.cont++;
-                    node.addHijo(new Nodo("BOOLEAN",parser.cont));
-                    parser.cont++;
-                    node.addHijo(new Nodo("TRUE",parser.cont));
-                    parser.cont++;
-
-                    //ojo true
-                    Objeto retVal = new Objeto(node,"BOOLEAN");
-                    RESULT=retVal;  
-                :}
-                | BOOLEANTYPE IGUAL FALSE {:
-                    Nodo node = new Nodo("=",parser.cont);
-                    parser.cont++;
-                    node.addHijo(new Nodo("BOOLEAN",parser.cont));
-                    parser.cont++;
-                    node.addHijo(new Nodo("FALSE",parser.cont));
-                    parser.cont++;
-
-                    //ojo false 
-                    Objeto retVal = new Objeto(node,"BOOLEAN");
-                    RESULT=retVal;
-                :}
-                | STRINGTYPE IGUAL UNIRSTRNG:ustr {:
-                    Nodo node = new Nodo("=",parser.cont);
-                    parser.cont++;
-                    node.addHijo(new Nodo("STRING",parser.cont));
-                    parser.cont++;
-                    node.addHijo(ustr);
-
-                    //ojo ustr
-                    Objeto retVal = new Objeto(node,"STRING");
-                    RESULT=retVal;
-                :}
-                |identificador:id IGUAL NEW CALL:c {:
-                    Nodo node = new Nodo("=",parser.cont);
-                    parser.cont++;
-                    node.addHijo(new Nodo(id,parser.cont));
-                    parser.cont++;
-                    node.addHijo(c);
-
-                    //ojo new call
-                    Objeto retVal = new Objeto(node,id);
                     RESULT=retVal;
                 :}
 ;

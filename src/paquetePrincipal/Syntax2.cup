@@ -23,8 +23,8 @@ parser code
 terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
 
-nonterminal S, MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, VALWR, OPARIT, DECLARACION, ASIGN, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, STATEMENTS,STRUCTUREDECLA, COUNTER,M, T, FORSTATEMENT, DOWHILESTATE;
-nonterminal String TIPO, CANTVARS, VARS, VALOR,VARCALL, PARAMCALL, CALL, OPCONDICION, OPASIGN, UNIRSTRNG, VALUNIRSTR;
+nonterminal S, MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, DECLARACION, ASIGN, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, STATEMENTS,STRUCTUREDECLA, COUNTER,M, T, FORSTATEMENT, DOWHILESTATE;
+nonterminal String TIPO, CANTVARS, VARS, VALOR,VARCALL, PARAMCALL, CALL, OPCONDICION, OPASIGN, UNIRSTRNG, VALUNIRSTR, OPARIT, VALWR;
 nonterminal Objeto CANTVARS2, VARS2, VARPARAMS, PARAMS;
 
 precedence left IGUAL;
@@ -245,10 +245,18 @@ VARCALL     ::= VALOR:val COMA VARCALL:v {:
 ;
 
 //gramática condiciones
-CONDICION   ::= CONDICION:c AND CONDICIONP:c1 {::}
-                | CONDICION:c OR CONDICIONP:c1 {::}
-                | NOT CONDICIONP:c {::}
-                | CONDICIONP:c {: :}
+CONDICION   ::= CONDICION:c AND CONDICIONP:c1 {:
+                    //cuadruplo
+                :}
+                | CONDICION:c OR CONDICIONP:c1 {:
+                    //cuadruplo
+                :}
+                | NOT CONDICIONP:c {:
+                    //cuadruplo
+                :}
+                | CONDICIONP:c {:
+                    //cuadruplo
+                :}
 ;
 
 CONDICIONP  ::= VALOR:v OPCONDICION:o VALOR:v2 {:
@@ -259,12 +267,16 @@ CONDICIONP  ::= VALOR:v OPCONDICION:o VALOR:v2 {:
                             errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " " + v + " no es del mismo tipo que " + v2);
                         }
                     } else {
-                        if (!v.equals("INTEGER")){
+                        if (v.equals("INTEGER") && v2.equals("INTEGER")){
+                            //cuadruplos
+                        } else {
+                            if (!v.equals("INTEGER")){
                             errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " " + v + " no es INTEGER");
-                        }
-                        if (!v2.equals("INTEGER")){
-                            errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " " + v + " no es INTEGER");
-                        }
+                            }
+                            if (!v2.equals("INTEGER")){
+                                errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " " + v + " no es INTEGER");
+                            }
+                        }                        
                     }
                 :}
 ;
@@ -297,7 +309,6 @@ UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
                     String tipo = "";
                     if (v.equals("STRING") && ustr.equals("STRING")){
                         tipo = "STRING";
-                        //cuadruplo
                     } else {
                         tipo = "ERROR";
                         if (!v.equals("STRING")){
@@ -313,7 +324,6 @@ UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
                     String tipo = "";                    
                     if (v.equals("STRING") && v2.equals("STRING")){
                         tipo = "STRING";
-                        //cuadruplo
                     } else {
                         tipo = "ERROR";
                         if (!v.equals("STRING")){                        
@@ -347,11 +357,67 @@ OPASIGN     ::= IGUAL {: RESULT="="; :}
 ;
 
 //gramática operaciones aritméticas
-OPARIT      ::= OPARIT:o OPADICION:oPa VALOR:v {::} 
-                | OPARIT:o OPMULTI:oM VALOR:v {::}
-                | PARENTESISL OPARIT:o PARENTESISR {: :} 
-                | VALOR:v OPADICION:oPa VALOR:v2 {::}
-                | VALOR:v OPMULTI:oM VALOR:v2 {::}
+OPARIT      ::= OPARIT:o OPADICION:oPa VALOR:v {:
+                    String tipo;
+                    if (o.equals("INTEGER") && v.equals("INTEGER")){
+                        tipo = "INTEGER";
+                        //cuadruplo
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esparaba un INTEGER");
+                        }
+                    }
+                    RESULT = tipo;
+                :} 
+                | OPARIT:o OPMULTI:oM VALOR:v {:
+                    String tipo;
+                    if (o.equals("INTEGER") && v.equals("INTEGER")){
+                        tipo = "INTEGER";
+                        //cuadruplo
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esparaba un INTEGER");
+                        }
+                    }
+                    RESULT = tipo;
+                :}
+                | PARENTESISL OPARIT:o PARENTESISR {: 
+                    RESULT = o;
+                :} 
+                | VALOR:v OPADICION:oPa VALOR:v2 {:
+                    String tipo;
+                    if (v.equals("INTEGER") && v2.equals("INTEGER")){
+                        tipo = "INTEGER";
+                        //cuadruplo
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esparaba un INTEGER");
+                        }
+                        if (!v2.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " se esparaba un INTEGER");
+                        }
+                    }
+                    RESULT = tipo;
+                :}
+                | VALOR:v OPMULTI:oM VALOR:v2 {:
+                    String tipo;
+                    if (v.equals("INTEGER") && v2.equals("INTEGER")){
+                        tipo = "INTEGER";
+                        //cuadruplo
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esparaba un INTEGER");
+                        }
+                        if (!v2.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " se esparaba un INTEGER");
+                        }
+                    }
+                    RESULT = tipo;
+                :}
 ;
 
 VALOR       ::= INTEGER:i {:
@@ -465,14 +531,29 @@ CANTVARS    ::= identificador:id COMA CANTVARS:c {:
 TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRING"; :} | BOOLEANTYPE {: RESULT="BOOLEAN"; :} | identificador:id {: RESULT=id; :} ;
 
 //gramática escribir en consola
-WRCONSOLE   ::= WRITE PARENTESISL VALWR:v PARENTESISR {::}
-                
+WRCONSOLE   ::= WRITE PARENTESISL VALWR:v PARENTESISR {:
+                    if (v.equals("STRING")){
+                        //cuadruplo
+                    } else {
+                        errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esperaba un STRING en el write.line"); 
+                    }
+                :}            
 ;
 
-VALWR       ::= identificador:id {: //buscar id 
+VALWR       ::= identificador:id {:
+                    int posID = tablaSimbolos.buscarID(id,posActualTabla);
+                    String tipo;
+                    if (posID == -1){
+                        tipo = "ERROR";
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " no existe "+ id + " en este ambito");
+                    } else {
+                        tipo = tablaSimbolos.getTipoID(posID);
+                    }
+
+                    RESULT = tipo;
                 :} 
-                | STRING:str {: :} 
-                | UNIRSTRNG:ustr {:  :}
+                | STRING:str {: RESULT = "STRING"; :} 
+                | UNIRSTRNG:ustr {: RESULT = ustr; :}
 ; 
 
 M           ::= {: :};

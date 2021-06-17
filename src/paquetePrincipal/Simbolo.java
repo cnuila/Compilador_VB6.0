@@ -31,7 +31,14 @@ public class Simbolo {
             return true;
         }
         return false;
-    }    
+    }
+    
+    public boolean esIgual(String identificador) {
+        if (this.identificador.equals(identificador)) {
+            return true;
+        }
+        return false;
+    } 
 
     public boolean esIgual(Simbolo simboloComparar) {
         if (this.identificador.equals(simboloComparar.getIdentificador())) {
@@ -42,6 +49,20 @@ public class Simbolo {
 
     public ArrayList<String> extraerAmbito(){
         return new ArrayList<>(Arrays.asList(this.ambito.split("[.]")));
+    }
+
+    public ArrayList<String> extraerParams(){
+        ArrayList<String> tipos = extraerTipoFuncion();
+        return new ArrayList<>(Arrays.asList(tipos.get(0).split("x")));
+    }
+
+    public String extraerRetorno(){
+        ArrayList<String> tipos = extraerTipoFuncion();
+        return tipos.get(1);
+    }
+
+    public ArrayList<String> extraerTipoFuncion(){
+        return new ArrayList<>(Arrays.asList(this.tipo.split("->")));
     }
 
     public String getIdentificador(){

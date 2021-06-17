@@ -126,7 +126,7 @@ STRUCTINSTRUC   ::= DECLARACION:d STRUCTINSTRUC:s {:
 ;
 
 //Instrucciones de un subprocedure
-SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea STATEMENTS:s END SUB {:
+SUBPROCE    ::= SUB identificador:id M:m PARENTESISL PARAMS:p PARENTESISR saltoLinea STATEMENTS:s END SUB {:
                         Nodo node = new Nodo("SUB",parser.cont);
                         parser.cont++;
                         node.addHijo(new Nodo(id,parser.cont));
@@ -139,22 +139,22 @@ SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea
                         }
 
                         //agregar ambito y offset
-                        tablaSimbolos.agregarAmbito(id+".", cantVarsCreadas);
+                        tablaSimbolos.agregarAmbito(id+".", cantVarsCreadas - m.getNum());
 
                         tablaSimbolos.agregarID(id,p.getTipo()+"->void",0,"");
-                        offset = 0;                        
-                        cantVarsCreadas = 0;                                                
+                        offset = m.getNum2();                        
+                        cantVarsCreadas = m.getNum();                                                
 
                         RESULT=node;
                 :}
-                | SUB error PARENTESISL PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: errores.add("Se esperaba un identificador para el sub"); :}
-                | SUB identificador error PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: errores.add("Se esperaba un parentesis izquierdo en el encabezado del sub"); :}
-                | SUB identificador PARENTESISL PARAMS error saltoLinea SUBINSTRUC END SUB {: errores.add("Se esperaba un parentesis derecho en el encabezado del sub"); :}
-                | SUB identificador PARENTESISL PARAMS PARENTESISR error SUBINSTRUC END SUB {: errores.add("Se esperaba un salto de linea en el encabezado del sub"); :}
+                | SUB error M PARENTESISL PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: errores.add("Se esperaba un identificador para el sub"); :}
+                | SUB identificador M error PARAMS PARENTESISR saltoLinea SUBINSTRUC END SUB {: errores.add("Se esperaba un parentesis izquierdo en el encabezado del sub"); :}
+                | SUB identificador M PARENTESISL PARAMS error saltoLinea SUBINSTRUC END SUB {: errores.add("Se esperaba un parentesis derecho en el encabezado del sub"); :}
+                | SUB identificador M PARENTESISL PARAMS PARENTESISR error SUBINSTRUC END SUB {: errores.add("Se esperaba un salto de linea en el encabezado del sub"); :}
 ;
 
 //Instrucciones de una función
-FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TIPO:t saltoLinea STATEMENTS:s END FUNCTION {:
+FUNC        ::= FUNCTION identificador:id M:m PARENTESISL PARAMS:p PARENTESISR AS TIPO:t saltoLinea STATEMENTS:s END FUNCTION {:
                         Nodo node = new Nodo("FUNCTION",parser.cont);
                         parser.cont++;
                         node.addHijo(new Nodo(id,parser.cont));
@@ -169,20 +169,20 @@ FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TI
                         }
 
                         //agregar ambito y offset
-                        tablaSimbolos.agregarAmbito(id+".", cantVarsCreadas);
+                        tablaSimbolos.agregarAmbito(id+".", cantVarsCreadas - m.getNum());
 
                         tablaSimbolos.agregarID(id,p.getTipo()+"->"+t,0,"");
-                        offset = 0;                        
-                        cantVarsCreadas = 0;
+                        offset = m.getNum2();                        
+                        cantVarsCreadas = m.getNum();
 
                         RESULT=node;
                 :}
-                | FUNCTION error PARENTESISL PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un identificador para la función"); :}
-                | FUNCTION identificador error PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un parentesis izquierdo en el encabezado de la función"); :}
-                | FUNCTION identificador PARENTESISL PARAMS error AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un parentesis derecho en el encabezado de la función"); :}
-                | FUNCTION identificador PARENTESISL PARAMS PARENTESISR error TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un AS en el encabezado de la función"); :}
-                | FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS error saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un TIPO en el encabezado de la función"); :}
-                | FUNCTION identificador PARENTESISL PARAMS PARENTESISR AS TIPO error FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un salto de línea en el encabezado de la función"); :}
+                | FUNCTION error M PARENTESISL PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un identificador para la función"); :}
+                | FUNCTION identificador M error PARAMS PARENTESISR AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un parentesis izquierdo en el encabezado de la función"); :}
+                | FUNCTION identificador M PARENTESISL PARAMS error AS TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un parentesis derecho en el encabezado de la función"); :}
+                | FUNCTION identificador M PARENTESISL PARAMS PARENTESISR error TIPO saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un AS en el encabezado de la función"); :}
+                | FUNCTION identificador M PARENTESISL PARAMS PARENTESISR AS error saltoLinea FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un TIPO en el encabezado de la función"); :}
+                | FUNCTION identificador M PARENTESISL PARAMS PARENTESISR AS TIPO error FUNCINSTRUC END FUNCTION {: errores.add("Se esperaba un salto de línea en el encabezado de la función"); :}
 ;
 
 //gramática parámetros
@@ -557,17 +557,17 @@ PARAMCALL   ::= VARCALL:v {:
                 :}
 ;
 
-VARCALL     ::= VARCALL:v COMA VALOR:val {:
+VARCALL     ::= VALOR:val COMA VARCALL:v {:
                     Nodo node = new Nodo("VARCALL",parser.cont);
                     parser.cont++;
-                    node.addHijo(v);
                     node.addHijo(val.getNodo());
+                    node.addHijo(v);
                     RESULT = node;
                 :}
                 | VALOR:v {:
                     RESULT = v.getNodo();
                 :}
-                | VARCALL error {: errores.add("Error en parametros"); :}
+                | error {: errores.add("Error en parametros"); :}
 ;
 
 //gramática condiciones
@@ -915,4 +915,4 @@ VALWR       ::= identificador:id {:
                 | error {: errores.add("Se esperaba un String"); :}
 ;
 
-M           ::= {: RESULT=new Marcador(cantVarsCreadas); :};
+M           ::= {: RESULT=new Marcador(cantVarsCreadas,offset); :};

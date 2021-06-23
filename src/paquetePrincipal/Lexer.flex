@@ -61,7 +61,7 @@ RETURN = return
 CONCATSTRING = "&"
 COMA = ,
 FUNCTION = function
-LLAMADOSTRUC = {identificador}"."{identificador}
+PUNTO = "."
 NEW = new 
 
 %%
@@ -107,7 +107,7 @@ NEW = new
     {STRUCTURE}             {return new Symbol(sym.STRUCTURE,yyline,yycolumn,yytext());}
     {PARENTESISL}           {return new Symbol(sym.PARENTESISL,yyline,yycolumn,yytext());}
     {PARENTESISR}           {return new Symbol(sym.PARENTESISR,yyline,yycolumn,yytext());} 
-    {LLAMADOSTRUC}          {return new Symbol(sym.LLAMADOSTRUC,yyline,yycolumn,yytext());}    
+    {PUNTO}                 {return new Symbol(sym.PUNTO,yyline,yycolumn,yytext());}    
     {identificador}         {return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
     {saltoLinea}            {return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
     {espacio}               {}

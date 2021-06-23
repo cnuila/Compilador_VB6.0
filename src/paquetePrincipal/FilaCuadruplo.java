@@ -1,3 +1,5 @@
+package paquetePrincipal;
+
 public class FilaCuadruplo {
 
     private String operacion;

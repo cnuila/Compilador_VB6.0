@@ -1,3 +1,4 @@
+package paquetePrincipal;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -22,6 +23,10 @@ public class Nodo {
     public Nodo(String _etiqueta, int _idNodo) {
         this.etiqueta = _etiqueta;
         this.idNodo = _idNodo;
+    }
+
+    Nodo(Nodo l, int cont) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void exportarArbol(String dotFormat, String fileName) {

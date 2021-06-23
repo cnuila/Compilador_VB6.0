@@ -1,0 +1,565 @@
+import java_cup.runtime.Symbol;
+import java.util.ArrayList;
+
+class parser2;
+
+parser code
+{:
+    public int cont = 0;    
+    public ArrayList<String> errores;
+    public TablaSimbolos tablaSimbolos; 
+    public int posActualTabla = 0;
+    public Cuadruplo cuadruplos = new Cuadruplo();
+
+    public void setErrores(ArrayList<String> _errores){
+        errores = _errores;
+    }
+    
+    public void setTablaSimbolos(TablaSimbolos _tabla){
+        tablaSimbolos = _tabla;
+    }
+
+:}
+
+terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
+terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
+
+nonterminal S, MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, DECLARACION, ASIGN, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, STATEMENTS,STRUCTUREDECLA, COUNTER,M, T, FORSTATEMENT, DOWHILESTATE;
+nonterminal String TIPO, CANTVARS, VARS, VALOR,VARCALL, PARAMCALL, CALL, OPCONDICION, OPASIGN, OPARIT;
+nonterminal Objeto CANTVARS2, VARS2, VARPARAMS, PARAMS;
+nonterminal Objeto2 VALWR, UNIRSTRNG, VALUNIRSTR;
+
+precedence left IGUAL;
+precedence left OPREL;
+precedence left OPADICION;
+precedence left OPMULTI;
+
+start with S;
+
+S      ::= MODULE identificador:id saltoLinea MDLINSTRUC:m END MODULE {:            
+            System.out.println("Listo Module");
+            System.out.println("---------------Cuadruplos----------------");           
+            cuadruplos.imprimirCuadruplos();
+        :}
+; 
+
+//if m != null
+//Instrucciones dentro del Module
+MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:                    
+                :}
+                | saltoLinea MDLINSTRUC:md {:
+                :}
+                | FUNC:f MDLINSTRUC:md {:                    
+                :}
+                | SUBPROCE:s MDLINSTRUC:md {:                    
+                :}
+                | STRUCTUREDECLA:sd MDLINSTRUC:md {:                    
+                    
+                :}
+                | saltoLinea
+;
+
+//Intrucciones de una Structure
+STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea STRUCTINSTRUC:s END STRUCTURE {:
+                :}
+;
+
+STRUCTINSTRUC   ::= DECLARACION:d STRUCTINSTRUC:s {:
+                    :} 
+                    | saltoLinea STRUCTINSTRUC:s {:
+                    :} 
+                    | saltoLinea {:
+                    :}
+;
+
+//Instrucciones de un subprocedure
+SUBPROCE    ::= SUB identificador:id PARENTESISL PARAMS:p PARENTESISR saltoLinea STATEMENTS:s END SUB {:
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,p.getTipo()+"->void");
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe el sub procedure "+ id + " en el programa");
+                    }
+                    posActualTabla+=1;
+                :}
+;
+
+//Instrucciones de una función
+FUNC        ::= FUNCTION identificador:id PARENTESISL PARAMS:p PARENTESISR AS TIPO:t saltoLinea STATEMENTS:s END FUNCTION {:                    
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,p.getTipo()+"->"+t);
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la función "+ id + " en el programa");
+                    }
+                    posActualTabla+=1;
+                :}
+;
+
+//gramática parámetros
+PARAMS      ::=  VARPARAMS:v {:
+                    RESULT = v;
+                :} 
+                | {:
+                    Objeto retVal = new Objeto("void","");
+                    RESULT = retVal;
+                :}
+;
+
+VARPARAMS      ::= identificador:id AS TIPO:t COMA VARS2:v {:
+                        int posSimbolo = tablaSimbolos.buscarSimbolo(id,t);
+                        boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                        if (!esValida){
+                            errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                        }
+
+                        posActualTabla+=1;
+                        Objeto retVal = new Objeto(t+v.getAcumulada(),"");
+                        RESULT = retVal;
+                    :}
+                    | identificador:id COMA CANTVARS2:c COMA VARS2:v {:                        
+                        int posSimbolo = tablaSimbolos.buscarSimbolo(id,c.getTipo());                        
+                        boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);                        
+                        if (!esValida){
+                            errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                        }
+
+                        posActualTabla+=1;
+                        Objeto retVal = new Objeto(c.getTipo()+c.getAcumulada()+v.getAcumulada(),"");
+                        RESULT = retVal;
+                    :}
+                    | identificador:id COMA CANTVARS2:c {: 
+                        int posSimbolo = tablaSimbolos.buscarSimbolo(id,c.getTipo());
+                        boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                        if (!esValida){
+                            errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                        }
+
+                        posActualTabla+=1;
+                        Objeto retVal = new Objeto(c.getTipo()+ c.getAcumulada(),"");
+                        RESULT = retVal;
+                    :}
+                    | identificador:id AS TIPO:t {:
+                        int posSimbolo = tablaSimbolos.buscarSimbolo(id,t);
+                        boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                        if (!esValida){
+                            errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                        }  
+
+                        posActualTabla+=1;
+                        Objeto retVal = new Objeto(t,"");
+                        RESULT = retVal;
+                    :}
+;
+
+VARS2           ::= CANTVARS2:c COMA VARS2:v {: 
+                        Objeto retVal = new Objeto(c.getTipo(), c.getAcumulada()+v.getAcumulada());
+                        RESULT = retVal;
+                    :}
+                    | CANTVARS2:c {: RESULT = c; :}                
+;
+
+CANTVARS2       ::= identificador:id COMA CANTVARS2:c {:
+                        int posSimbolo = tablaSimbolos.buscarSimbolo(id,c.getTipo());
+                        boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                        if (!esValida){
+                            errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                        }
+
+                        posActualTabla+=1;
+                        Objeto retval = new Objeto(c.getTipo(),"x"+c.getTipo()+c.getAcumulada());
+                        RESULT = retval;
+                    :}
+                    | identificador:id AS TIPO:t {:
+                        int posSimbolo = tablaSimbolos.buscarSimbolo(id,t);
+                        boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                        if (!esValida){
+                            errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                        }
+                        
+                        posActualTabla+=1;
+                        Objeto retval = new Objeto(t,"x"+t);
+                        RESULT = retval;
+                    :}
+;
+
+//statements
+STATEMENTS  ::= DECLARACION:d STATEMENTS:s {::}
+                | saltoLinea STATEMENTS:s {::}
+                | EXIT SUB STATEMENTS:s {::}
+                | EXIT FUNCTION STATEMENTS:s {::}
+                | ASIGN:a STATEMENTS:s {::}
+                | RETVAL:r STATEMENTS:s {::}
+                | CALL:c STATEMENTS:s {::}
+                | WRCONSOLE:w STATEMENTS:s {::}
+                | IFSTATEMENT:i STATEMENTS:s {::}
+                | FORSTATEMENT:f STATEMENTS:s {::}
+                |  DOWHILESTATE:d STATEMENTS:s {::}
+                |{::}
+;    
+
+IFSTATEMENT      ::= IF CONDICION:c THEN M:m saltoLinea STATEMENTS:s SIFSTATEMENT:s2 END IF{::}
+;        
+
+SIFSTATEMENT ::= ELSEIF CONDICION:c THEN saltoLinea STATEMENTS:s SIFSTATEMENT:s2  {::}
+                |  ELSE saltoLinea STATEMENTS:s {::} 
+                | {::}
+;
+
+
+DOWHILESTATE  ::= DO WHILE CONDICION:c saltoLinea STATEMENTS:s LOOP{::}
+;
+
+FORSTATEMENT  ::= FOR COUNTER:c TO VALOR:v saltoLinea STATEMENTS:s NEXT{::}
+;
+
+RETVAL      ::= RETURN VALOR:v {::}
+;
+
+//Instrucciones del for
+COUNTER     ::= identificador:id OPASIGN:o VALOR:v {::} 
+                | identificador:id AS INTEGERTYPE IGUAL VALOR:v{::}
+;
+
+//llamado de funcion o sub procedure
+CALL        ::= identificador:id PARENTESISL PARAMCALL:p PARENTESISR {:
+                    String tipo;
+                    int posFunc = tablaSimbolos.buscarFUNC(id, p);
+                    if (posFunc == -1){
+                        tipo = "ERROR";
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " no existe la funcion o procedure "+ id + " con parametros "+p);
+                    } else {
+                        tipo = tablaSimbolos.getTipoRetorno(posFunc);
+                    }
+                    RESULT = tipo;
+                :}
+;                
+
+PARAMCALL   ::= VARCALL:v {:
+                    RESULT = v;
+                :} 
+                | {: RESULT="void";
+                :}
+;
+
+VARCALL     ::= VALOR:val COMA VARCALL:v {:
+                    RESULT = val + "x" + v;
+                :}
+                | VALOR:v {:
+                    RESULT = v;
+                :}
+;
+
+//gramática condiciones
+CONDICION   ::= CONDICION:c AND CONDICIONP:c1 {:
+                    //cuadruplo
+                :}
+                | CONDICION:c OR CONDICIONP:c1 {:
+                    //cuadruplo
+                :}
+                | NOT CONDICIONP:c {:
+                    //cuadruplo
+                :}
+                | CONDICIONP:c {:
+                    //cuadruplo
+                :}
+;
+
+CONDICIONP  ::= VALOR:v OPCONDICION:o VALOR:v2 {:
+                    if (o.equals("=")){
+                        if ( v.equals(v2) ){
+                            //cuadruplos
+                        } else {
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " " + v + " no es del mismo tipo que " + v2);
+                        }
+                    } else {
+                        if (v.equals("INTEGER") && v2.equals("INTEGER")){
+                            //cuadruplos
+                        } else {
+                            if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " " + v + " no es INTEGER");
+                            }
+                            if (!v2.equals("INTEGER")){
+                                errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " " + v + " no es INTEGER");
+                            }
+                        }                        
+                    }
+                :}
+;
+
+OPCONDICION ::= OPREL:o {: RESULT=o; :} 
+                | IGUAL {: RESULT="="; :}
+;              
+
+//gramática asignacion
+ASIGN       ::= identificador:id OPASIGN:o VALOR:v {:
+                    int posID = tablaSimbolos.buscarID(id,posActualTabla);                    
+                    if (posID == -1){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " no existe "+ id + " en este ambito");
+                    } else {
+                        String tipo  = tablaSimbolos.getTipoID(posID);
+                        if (tipo.equals(v)){
+                            //cuadruplo con el o
+                        } else {
+                            errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) +  " "+ id + " esperaba un "+ tipo + " y se le está asignando un "+ v);
+                        }
+                    }
+                :}
+                | identificador:id IGUAL READ {:
+                    //cuadruplo con el tipo que va a guardar el read
+                :}
+                | LLAMADOSTRUC:l OPASIGN:o VALOR:v {::}
+; 
+
+UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
+                    String tipo = "";
+
+                    if (v.equals("STRING") && ustr.equals("STRING")){
+                        tipo = "STRING";
+
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("STRING")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esperaba un STRING no un "+v);
+                        }
+                        if (!ustr.equals("STRING")){
+                            errores.add("Error: Linea: "+ (ustrleft + 1) + " Columna: " + (ustrright + 1) + " se esperaba un STRING no un "+ustr);
+                        }
+                    }
+                    RESULT = tipo;
+                :} 
+                | VALUNIRSTR:v CONCATSTRING VALUNIRSTR:v2 {:
+                    String tipo = "";                    
+                    if (v.getTipo().equals("STRING") && v2.getTipo().equals("STRING")){
+                        tipo = "STRING";
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.getTipo().equals("STRING")){                        
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esperaba un STRING no un "+v);
+                        }
+                        if (!v2.getTipo().equals("STRING")){
+                            errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " se esperaba un STRING no un "+v2);
+                        }
+                    }
+                    RESULT = tipo;
+                :}
+;
+
+VALUNIRSTR  ::= STRING:str {: RESULT = new Objeto2("STRING",str); :} 
+                | identificador:id {:
+                    int posID = tablaSimbolos.buscarID(id,posActualTabla);
+                    String tipo;
+                    if (posID == -1){
+                        tipo = "ERROR";
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " no existe "+ id + " en este ambito");
+                    } else {
+                        tipo = tablaSimbolos.getTipoID(posID);
+                    }
+                    RESULT = new Objeto2(tipo,id);
+                :}
+;
+
+OPASIGN     ::= IGUAL {: RESULT="="; :} 
+                | OPMULTI:op IGUAL {: RESULT=op+"="; :}  
+                | OPADICION:op IGUAL {: RESULT=op+"="; :}  
+;
+
+//gramática operaciones aritméticas
+OPARIT      ::= OPARIT:o OPADICION:oPa VALOR:v {:
+                    String tipo;
+                    if (o.equals("INTEGER") && v.equals("INTEGER")){
+                        tipo = "INTEGER";
+                        //cuadruplo
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esparaba un INTEGER");
+                        }
+                    }
+                    RESULT = tipo;
+                :} 
+                | OPARIT:o OPMULTI:oM VALOR:v {:
+                    String tipo;
+                    if (o.equals("INTEGER") && v.equals("INTEGER")){
+                        tipo = "INTEGER";
+                        //cuadruplo
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esparaba un INTEGER");
+                        }
+                    }
+                    RESULT = tipo;
+                :}
+                | PARENTESISL OPARIT:o PARENTESISR {: 
+                    RESULT = o;
+                :} 
+                | VALOR:v OPADICION:oPa VALOR:v2 {:
+                    String tipo;
+                    if (v.equals("INTEGER") && v2.equals("INTEGER")){
+                        tipo = "INTEGER";
+                        //cuadruplo
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esparaba un INTEGER");
+                        }
+                        if (!v2.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " se esparaba un INTEGER");
+                        }
+                    }
+                    RESULT = tipo;
+                :}
+                | VALOR:v OPMULTI:oM VALOR:v2 {:
+                    String tipo;
+                    if (v.equals("INTEGER") && v2.equals("INTEGER")){
+                        tipo = "INTEGER";
+                        //cuadruplo
+                    } else {
+                        tipo = "ERROR";
+                        if (!v.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esparaba un INTEGER");
+                        }
+                        if (!v2.equals("INTEGER")){
+                            errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " se esparaba un INTEGER");
+                        }
+                    }
+                    RESULT = tipo;
+                :}
+;
+
+VALOR       ::= INTEGER:i {:
+                    RESULT = "INTEGER";
+                :}
+                | STRING:str  {:
+                    RESULT = "STRING";
+                :}
+                | TRUE {:
+                    RESULT = "TRUE";
+                :}
+                | FALSE {:
+                    RESULT = "FALSE";
+                :}
+                | NEW CALL:c {:
+                    RESULT = c;
+                :}
+                | CALL:c {:
+                    RESULT = c;
+                :}
+                | UNIRSTRNG:ustr {:
+                    RESULT = "STRING";
+                :}
+                | identificador:id {:
+                    int posID = tablaSimbolos.buscarID(id,posActualTabla);
+                    String tipo;
+                    if (posID == -1){
+                        tipo = "ERROR";
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " no existe "+ id + " en este ambito");
+                    } else {
+                        tipo = tablaSimbolos.getTipoID(posID);
+                    }
+
+                    RESULT = tipo;
+                :}
+                | OPARIT:o {:
+                    RESULT = "INTEGER";
+                :}
+;
+
+//gramática declaración de variables
+DECLARACION ::= DIM T;
+
+T           ::= identificador:id AS TIPO:t IGUAL VALOR {:
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,t);
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                    }
+                    posActualTabla+=1;
+                :}
+                | identificador:id AS TIPO:t COMA VARS:v {:
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,t);
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                    }
+                    posActualTabla+=1;
+                :}
+                | identificador:id COMA CANTVARS:c COMA VARS:v {:
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,c);
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                    }
+                    posActualTabla+=1;
+                :}
+                | identificador:id COMA CANTVARS:c {: 
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,c);
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                    }
+                    posActualTabla+=1;
+                :}
+                | identificador:id AS TIPO:t {:
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,t);
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                    }   
+                    posActualTabla+=1;                
+                :}
+;
+
+VARS        ::= CANTVARS:c COMA VARS:v {: RESULT = c; :}
+                | CANTVARS:c {: RESULT = c; :}                
+;
+
+CANTVARS    ::= identificador:id COMA CANTVARS:c {:
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,c);
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                    }
+                    posActualTabla+=1;
+                    RESULT = c;                    
+                :}
+                | identificador:id AS TIPO:t {:                    
+                    int posSimbolo = tablaSimbolos.buscarSimbolo(id,t);
+                    boolean esValida = tablaSimbolos.comprobarAmbito(posSimbolo);
+                    if (!esValida){
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " ya existe la variable "+ id + " en ese ambito");
+                    }
+                    posActualTabla+=1;
+                    RESULT = t;
+                :}
+;
+
+
+TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRING"; :} | BOOLEANTYPE {: RESULT="BOOLEAN"; :} | identificador:id {: RESULT=id; :} ;
+
+//gramática escribir en consola
+WRCONSOLE   ::= WRITE PARENTESISL VALWR:v PARENTESISR {:
+                    if (v.getTipo().equals("STRING")){
+                        //cuadruplo
+                        cuadruplo.addCuadruplo("write.console",v.getValor());
+                    } else {
+                        errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esperaba un STRING en el write.line"); 
+                    }
+                :}            
+;
+
+VALWR       ::= identificador:id {:
+                    int posID = tablaSimbolos.buscarID(id,posActualTabla);
+                    String tipo;
+                    if (posID == -1){
+                        tipo = "ERROR";
+                        errores.add("Error: Linea: "+ (idleft + 1) + " Columna: " + (idright + 1) + " no existe "+ id + " en este ambito");
+                    } else {
+                        tipo = tablaSimbolos.getTipoID(posID);
+                    }
+                    RESULT = new Objeto2(tipo,id);
+                :} 
+                | STRING:str {: RESULT = new Objeto2("STRING",str); :} 
+                | UNIRSTRNG:ustr {: RESULT = ustr; :}
+; 
+
+M           ::= {: :};

@@ -1,4 +1,3 @@
-package paquetePrincipal;
 public class Objeto {
 
     private Nodo nodo;

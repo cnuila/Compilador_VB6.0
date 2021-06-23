@@ -13,6 +13,7 @@ public class sym {
   public static final int identificador = 38;
   public static final int FOR = 27;
   public static final int WRITE = 37;
+  public static final int LLAMADOSTRUC = 44;
   public static final int NOT = 20;
   public static final int AND = 18;
   public static final int OPMULTI = 42;
@@ -36,7 +37,6 @@ public class sym {
   public static final int OPADICION = 41;
   public static final int MODULE = 22;
   public static final int ELSE = 3;
-  public static final int PUNTO = 44;
   public static final int READ = 36;
   public static final int TO = 28;
   public static final int WHILE = 30;
@@ -96,7 +96,7 @@ public class sym {
   "OPADICION",
   "OPMULTI",
   "OPREL",
-  "PUNTO"
+  "LLAMADOSTRUC"
   };
 }
 

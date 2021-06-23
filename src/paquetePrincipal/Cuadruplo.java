@@ -1,5 +1,3 @@
-package paquetePrincipal;
-
 import java.util.ArrayList;
 
 public class Cuadruplo {
@@ -32,5 +30,24 @@ public class Cuadruplo {
 
     public int siguienteCuad(){
         return this.tablaCuadruplos.size();
+    }
+
+    public void completa(ArrayList<Integer> lista, int indice){
+        if (lista != null){
+            for(int i = 0; i < lista.size(); i++){
+                System.out.println((tablaCuadruplos.get(lista.get(i))));
+                if (tablaCuadruplos.get(lista.get(i)).hayArg1()){
+                    if (!tablaCuadruplos.get(lista.get(i)).getArg1().equals(Integer.toString(indice))){
+                        tablaCuadruplos.get(lista.get(i)).setDestino(Integer.toString(indice));
+                    }                    
+                } else {
+                    tablaCuadruplos.get(lista.get(i)).setArg1(Integer.toString(indice));
+                }                
+            }
+        }        
+    }
+
+    public void eliminarUltimo(){
+        tablaCuadruplos.remove(tablaCuadruplos.size() - 1);
     }
 }

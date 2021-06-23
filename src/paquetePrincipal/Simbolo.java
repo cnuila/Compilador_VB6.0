@@ -59,7 +59,7 @@ public class Simbolo {
 
     public String extraerRetorno() {
         ArrayList<String> tipos = extraerTipoFuncion();
-        return tipos.get(1);
+        return tipos.get(tipos.size() - 1);
     }
 
     public ArrayList<String> extraerTipoFuncion() {

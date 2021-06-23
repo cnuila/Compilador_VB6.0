@@ -1,5 +1,3 @@
-package paquetePrincipal;
-
 public class FilaCuadruplo {
 
     private String operacion;
@@ -26,6 +24,26 @@ public class FilaCuadruplo {
         this.arg1 = _arg1;
         this.arg2 = "";
         this.destino = "";
+    }
+
+    public void setArg1(String _arg1){
+        this.arg1 = _arg1;
+    }
+
+    public String getArg1(){
+        return this.arg1;
+    }
+
+    public void setDestino(String _destino){
+        this.destino = _destino;
+    }
+
+    public boolean hayArg1(){
+        if (arg1.equals("")){
+            return false;
+        } else {
+            return true;
+        }
     }
 
 

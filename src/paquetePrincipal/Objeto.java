@@ -1,33 +1,36 @@
-package paquetePrincipal;
-
 public class Objeto {
 
     private Nodo nodo;
     private String tipo;
     private String acumulada;
 
-    public Objeto(Nodo _nodo, String _tipo){
+    public Objeto(Nodo _nodo, String _tipo) {
         this.nodo = _nodo;
         this.tipo = _tipo;
         this.acumulada = "";
     }
 
-    public Objeto(Nodo _nodo, String _tipo, String _acumulada){
+    public Objeto(String _tipo, String _acumulada) {
+        this.tipo = _tipo;
+        this.acumulada = _acumulada;
+    }
+
+    public Objeto(Nodo _nodo, String _tipo, String _acumulada) {
         this.nodo = _nodo;
         this.tipo = _tipo;
         this.acumulada = _acumulada;
     }
 
-    public Nodo getNodo(){
+    public Nodo getNodo() {
         return this.nodo;
     }
 
-    public String getTipo(){
+    public String getTipo() {
         return this.tipo;
     }
 
-    public String getAcumulada(){
+    public String getAcumulada() {
         return this.acumulada;
     }
-    
+
 }

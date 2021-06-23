@@ -1,6 +1,4 @@
-package paquetePrincipal;
 import java_cup.runtime.Symbol;
-import java.util.ArrayList;
 %%
 
 %cup
@@ -15,7 +13,6 @@ import java.util.ArrayList;
 
 %{
     String cadena = "";
-    ArrayList<String> errors = new ArrayList();
 %}
 
 saltoLinea = \n|\r|\n\r
@@ -114,7 +111,7 @@ NEW = new
     {identificador}         {return new Symbol(sym.identificador,yyline,yycolumn,yytext());}     
     {saltoLinea}            {return new Symbol(sym.saltoLinea,yyline,yycolumn,yytext());}
     {espacio}               {}
-    .                       {errors.add("Error léxico en: Linea: " + (yyline + 1) + " Columna: " + (yycolumn + 1));}    
+    .                       {System.out.println("Error léxico en: " + (yyline + 1) + " " + (yycolumn + 1));}    
 }
 
 <STRING> {

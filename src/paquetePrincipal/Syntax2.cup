@@ -9,6 +9,7 @@ parser code
     public ArrayList<String> errores;
     public TablaSimbolos tablaSimbolos; 
     public int posActualTabla = 0;
+    public Cuadruplo cuadruplos = new Cuadruplo();
 
     public void setErrores(ArrayList<String> _errores){
         errores = _errores;
@@ -24,8 +25,9 @@ terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, A
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
 
 nonterminal S, MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, DECLARACION, ASIGN, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, STATEMENTS,STRUCTUREDECLA, COUNTER,M, T, FORSTATEMENT, DOWHILESTATE;
-nonterminal String TIPO, CANTVARS, VARS, VALOR,VARCALL, PARAMCALL, CALL, OPCONDICION, OPASIGN, UNIRSTRNG, VALUNIRSTR, OPARIT, VALWR;
+nonterminal String TIPO, CANTVARS, VARS, VALOR,VARCALL, PARAMCALL, CALL, OPCONDICION, OPASIGN, OPARIT;
 nonterminal Objeto CANTVARS2, VARS2, VARPARAMS, PARAMS;
+nonterminal Objeto2 VALWR, UNIRSTRNG, VALUNIRSTR;
 
 precedence left IGUAL;
 precedence left OPREL;
@@ -35,7 +37,9 @@ precedence left OPMULTI;
 start with S;
 
 S      ::= MODULE identificador:id saltoLinea MDLINSTRUC:m END MODULE {:            
-            System.out.println("Listo Module");           
+            System.out.println("Listo Module");
+            System.out.println("---------------Cuadruplos----------------");           
+            cuadruplos.imprimirCuadruplos();
         :}
 ; 
 
@@ -307,8 +311,10 @@ ASIGN       ::= identificador:id OPASIGN:o VALOR:v {:
 
 UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
                     String tipo = "";
+
                     if (v.equals("STRING") && ustr.equals("STRING")){
                         tipo = "STRING";
+
                     } else {
                         tipo = "ERROR";
                         if (!v.equals("STRING")){
@@ -322,14 +328,14 @@ UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
                 :} 
                 | VALUNIRSTR:v CONCATSTRING VALUNIRSTR:v2 {:
                     String tipo = "";                    
-                    if (v.equals("STRING") && v2.equals("STRING")){
+                    if (v.getTipo().equals("STRING") && v2.getTipo().equals("STRING")){
                         tipo = "STRING";
                     } else {
                         tipo = "ERROR";
-                        if (!v.equals("STRING")){                        
+                        if (!v.getTipo().equals("STRING")){                        
                             errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esperaba un STRING no un "+v);
                         }
-                        if (!v2.equals("STRING")){
+                        if (!v2.getTipo().equals("STRING")){
                             errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " se esperaba un STRING no un "+v2);
                         }
                     }
@@ -337,7 +343,7 @@ UNIRSTRNG   ::= VALUNIRSTR:v CONCATSTRING UNIRSTRNG:ustr {:
                 :}
 ;
 
-VALUNIRSTR  ::= STRING:str {: RESULT = "STRING"; :} 
+VALUNIRSTR  ::= STRING:str {: RESULT = new Objeto2("STRING",str); :} 
                 | identificador:id {:
                     int posID = tablaSimbolos.buscarID(id,posActualTabla);
                     String tipo;
@@ -347,7 +353,7 @@ VALUNIRSTR  ::= STRING:str {: RESULT = "STRING"; :}
                     } else {
                         tipo = tablaSimbolos.getTipoID(posID);
                     }
-                    RESULT = tipo;
+                    RESULT = new Objeto2(tipo,id);
                 :}
 ;
 
@@ -532,8 +538,9 @@ TIPO        ::= INTEGERTYPE {: RESULT="INTEGER"; :} | STRINGTYPE {: RESULT="STRI
 
 //gramática escribir en consola
 WRCONSOLE   ::= WRITE PARENTESISL VALWR:v PARENTESISR {:
-                    if (v.equals("STRING")){
+                    if (v.getTipo().equals("STRING")){
                         //cuadruplo
+                        cuadruplo.addCuadruplo("write.console",v.getValor());
                     } else {
                         errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " se esperaba un STRING en el write.line"); 
                     }
@@ -549,10 +556,9 @@ VALWR       ::= identificador:id {:
                     } else {
                         tipo = tablaSimbolos.getTipoID(posID);
                     }
-
-                    RESULT = tipo;
+                    RESULT = new Objeto2(tipo,id);
                 :} 
-                | STRING:str {: RESULT = "STRING"; :} 
+                | STRING:str {: RESULT = new Objeto2("STRING",str); :} 
                 | UNIRSTRNG:ustr {: RESULT = ustr; :}
 ; 
 

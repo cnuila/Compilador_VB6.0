@@ -15,11 +15,11 @@ public class Simbolo {
         this.offset = _offset;
         this.ambito = _ambito;
         int sizeT = 0;
-        //ojo revisar caso de STRING
-        if (_tipo.equals("INTEGER")){
+        // ojo revisar caso de STRING
+        if (_tipo.equals("INTEGER")) {
             sizeT = 4;
         }
-        if (_tipo.equals("BOOLEAN")){
+        if (_tipo.equals("BOOLEAN")) {
             sizeT = 1;
         }
         this.size = sizeT;
@@ -32,60 +32,60 @@ public class Simbolo {
         }
         return false;
     }
-    
+
     public boolean esIgual(String identificador) {
         if (this.identificador.equals(identificador)) {
             return true;
         }
         return false;
-    } 
+    }
 
     public boolean esIgual(Simbolo simboloComparar) {
         if (this.identificador.equals(simboloComparar.getIdentificador())) {
             return true;
         }
         return false;
-    }    
+    }
 
-    public ArrayList<String> extraerAmbito(){
+    public ArrayList<String> extraerAmbito() {
         return new ArrayList<>(Arrays.asList(this.ambito.split("[.]")));
     }
 
-    public ArrayList<String> extraerParams(){
+    public ArrayList<String> extraerParams() {
         ArrayList<String> tipos = extraerTipoFuncion();
         return new ArrayList<>(Arrays.asList(tipos.get(0).split("x")));
     }
 
-    public String extraerRetorno(){
+    public String extraerRetorno() {
         ArrayList<String> tipos = extraerTipoFuncion();
         return tipos.get(1);
     }
 
-    public ArrayList<String> extraerTipoFuncion(){
+    public ArrayList<String> extraerTipoFuncion() {
         return new ArrayList<>(Arrays.asList(this.tipo.split("->")));
     }
 
-    public String getIdentificador(){
+    public String getIdentificador() {
         return this.identificador;
     }
 
-    public String getTipo(){
+    public String getTipo() {
         return this.tipo;
     }
 
-    public int getSize(){
+    public int getSize() {
         return this.size;
-    }    
+    }
 
-    public void setAmbitoPrefijo(String _ambito){
+    public void setAmbitoPrefijo(String _ambito) {
         this.ambito = _ambito + this.ambito;
-    }    
+    }
 
-    public void estaVerificada(boolean _verificada){
+    public void estaVerificada(boolean _verificada) {
         this.verficada = _verificada;
     }
 
     public String toString() {
-        return identificador + " " + tipo + " offset: " + offset + " ambito: " + ambito + " verificada:"+verficada;
+        return identificador + " " + tipo + " offset: " + offset + " ambito: " + ambito + " verificada:" + verficada;
     }
 }

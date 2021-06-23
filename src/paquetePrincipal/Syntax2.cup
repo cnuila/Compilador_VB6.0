@@ -32,7 +32,7 @@ parser code
         return retVal;
     }
 
-    publlic ArrayList<Integer> creaLista(ArrayList<Integer> lista1, ArrayList<Integer> lista2){
+    public ArrayList<Integer> creaLista(ArrayList<Integer> lista1, ArrayList<Integer> lista2){
         ArrayList<Integer> retVal = new ArrayList<>();
         for(int i = 0; i < lista1.size();i++){
             retVal.add(lista1.get(i));
@@ -44,7 +44,7 @@ parser code
     }
 
     public void completa(ArrayList<Integer> lista, int indice){
-        
+
     }
 
 :}

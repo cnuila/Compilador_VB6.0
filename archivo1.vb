@@ -1,30 +1,19 @@
 Module VbModule
 
-        function factorial(n As Integer) As Integer
-                If n = 0 Then
-                    return 1
-                else
-                    return n*factorial(n-1)
-                end if
-        End Function
-
         Sub Main()
-                console.writeline("Ingrese el n para calcular el factorial")
-                Dim n as Integer 
-                n = console.readline()
-                factorial(n)                
-        end sub
-
-        sub factorialIterativo(n AS Integer)                
-                Dim acum as Integer = 1  
-                if n = 0 OR n = 1 Then
-                      acum = 1
-                else                          
-                        for i = 2 to n
-                                acum *= i
-                        Next
-                end if
-                console.writeline("El factorial es" & acum) 
+                do while index > 10
+                    dim holi as Integer
+                    index+=1
+                loop
+                holi+=5
+                for indexA = 1 to 3
+                    dim hola as Employee = New Employee()
+                    hola.salary = 30
+                    for indexB = 20 to 1
+                        hola.salary += 30
+                    Next
+                Next
+                hola.salary+=5                               
         end sub
 
 End Module

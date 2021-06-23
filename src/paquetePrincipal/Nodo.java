@@ -39,9 +39,9 @@ public class Nodo {
         gv.decreaseDpi();
         gv.decreaseDpi();
         // linux
-        File out = new File("./" + fileName + gv.getImageDpi() + "." + type);
+        //File out = new File("./" + fileName + gv.getImageDpi() + "." + type);
         // windows
-        // File out = new File(fileName + "." + type);
+        File out = new File(fileName + "." + type);
         gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), type, repesentationType), out);
     }
 

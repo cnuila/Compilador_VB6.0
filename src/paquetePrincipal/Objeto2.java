@@ -8,7 +8,7 @@ public class Objeto2 {
         this.valor = _valor;
     }
 
-    public Nodo getValor() {
+    public String getValor() {
         return this.valor;
     }
 

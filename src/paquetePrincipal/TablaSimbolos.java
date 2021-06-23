@@ -50,7 +50,6 @@ public class TablaSimbolos {
     public int buscarID(String identificador, int posIniciar) {
         // busca hasta que encuentra una función
         for (int i = posIniciar - 1; i >= 0; i--) {
-            // System.out.println("i="+i);
             if (tabla.get(i).getIdentificador().equals(identificador)) {
                 return i;
             }
@@ -157,6 +156,18 @@ public class TablaSimbolos {
             cantRestar += this.tabla.get(this.tabla.size() - i - 1).getSize();
         }
         return cantRestar;
+    }
+
+    public int siguienteFuncion(int posActualTabla){
+        for(int i = posActualTabla; i < tabla.size();i++){
+            Simbolo simbolo = tabla.get(i);
+            if (simbolo.extraerAmbito().get(0).equals("")){
+                if (simbolo.getTipo().contains("->")){
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
 }

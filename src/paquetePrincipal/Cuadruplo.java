@@ -1,4 +1,4 @@
-package paquetePrincipal;
+
 import java.util.ArrayList;
 
 public class Cuadruplo {
@@ -7,6 +7,10 @@ public class Cuadruplo {
 
     Cuadruplo() {
         this.tablaCuadruplos = new ArrayList<>();
+    }
+
+    public ArrayList<FilaCuadruplo> getListaCuadruplo(){
+        return tablaCuadruplos;
     }
 
     public void addCuadruplo(String operacion, String arg1, String arg2, String destino) {
@@ -19,6 +23,10 @@ public class Cuadruplo {
 
     public void addCuadruplo(String operacion, String arg1) {
         tablaCuadruplos.add(new FilaCuadruplo(operacion, arg1));
+    }
+
+    public void addCuadruplo(String operacion, String arg1, int lugar) {
+        tablaCuadruplos.add(lugar,new FilaCuadruplo(operacion, arg1));
     }
 
     public void imprimirCuadruplos() {

@@ -32,19 +32,19 @@ parser code
         return retVal;
     }
 
-    public ArrayList<Integer> creaLista(ArrayList<Integer> lista1, ArrayList<Integer> lista2){
+    public ArrayList<Integer> fusiona(ArrayList<Integer> lista1, ArrayList<Integer> lista2){
         ArrayList<Integer> retVal = new ArrayList<>();
-        for(int i = 0; i < lista1.size();i++){
-            retVal.add(lista1.get(i));
-        }
-        for(int i = 0; i < lista2.size();i++){
-            retVal.add(lista2.get(i));
-        }
+        if (lista1 != null){
+            for(int i = 0; i < lista1.size();i++){
+                retVal.add(lista1.get(i));
+            }
+        }       
+        if (lista2 != null){
+            for(int i = 0; i < lista2.size();i++){
+                retVal.add(lista2.get(i));
+            }
+        }         
         return retVal;
-    }
-
-    public void completa(ArrayList<Integer> lista, int indice){
-
     }
 
 :}
@@ -52,16 +52,19 @@ parser code
 terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
 
-nonterminal S, MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, DECLARACION, ASIGN, RETVAL, SIFSTATEMENT, IFSTATEMENT, STATEMENTS,STRUCTUREDECLA, COUNTER,M, T, FORSTATEMENT, DOWHILESTATE;
+nonterminal S, MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, DECLARACION, ASIGN, RETVAL,STRUCTUREDECLA, COUNTER, T, FORSTATEMENT, DOWHILESTATE;
 nonterminal String TIPO, CANTVARS, VARS,VARCALL, PARAMCALL, OPCONDICION, OPASIGN;
 nonterminal Objeto CANTVARS2, VARS2, VARPARAMS, PARAMS;
 nonterminal Objeto2 VALWR, UNIRSTRNG, VALUNIRSTR, VALOR, OPARIT,CALL;
 nonterminal Condiciones CONDICION, CONDICIONP;
+nonterminal Marcador M;
+nonterminal ArrayList<Integer> IFSTATEMENT, SIFSTATEMENT, STATEMENTS, N;
 
 precedence left IGUAL;
 precedence left OPREL;
-precedence left OPADICION;
-precedence left OPMULTI;
+precedence left OPADICION, OR;
+precedence left OPMULTI,AND;
+precedence left NOT;
 
 start with S;
 
@@ -211,26 +214,58 @@ CANTVARS2       ::= identificador:id COMA CANTVARS2:c {:
 ;
 
 //statements
-STATEMENTS  ::= DECLARACION:d STATEMENTS:s {::}
-                | saltoLinea STATEMENTS:s {::}
-                | EXIT SUB STATEMENTS:s {::}
-                | EXIT FUNCTION STATEMENTS:s {::}
-                | ASIGN:a STATEMENTS:s {::}
-                | RETVAL:r STATEMENTS:s {::}
-                | CALL:c STATEMENTS:s {::}
-                | WRCONSOLE:w STATEMENTS:s {::}
-                | IFSTATEMENT:i STATEMENTS:s {::}
-                | FORSTATEMENT:f STATEMENTS:s {::}
-                |  DOWHILESTATE:d STATEMENTS:s {::}
+STATEMENTS  ::= DECLARACION:d STATEMENTS:s {: RESULT = null; :}
+                | saltoLinea STATEMENTS:s {: RESULT = null; :}
+                | EXIT SUB STATEMENTS:s {: RESULT = null; :}
+                | EXIT FUNCTION STATEMENTS:s {: RESULT = null; :}
+                | ASIGN:a STATEMENTS:s {: RESULT = null; :}
+                | RETVAL:r STATEMENTS:s {: 
+                        //ojo
+                        RESULT = new ArrayList<>(); 
+                :}
+                | CALL:c STATEMENTS:s {: RESULT = null; :}
+                | WRCONSOLE:w STATEMENTS:s {: RESULT = null; :}
+                | IFSTATEMENT:i M:m STATEMENTS:s {: 
+                    System.out.println("i"+i);
+                    System.out.println("s"+s);
+                    cuadruplos.completa(i,m.getNum());
+                    RESULT = i; 
+                :}
+                | FORSTATEMENT:f STATEMENTS:s {: RESULT = null; :}
+                | DOWHILESTATE:d STATEMENTS:s {: RESULT = null; :}
                 |{::}
 ;    
 
-IFSTATEMENT      ::= IF CONDICION:c THEN M:m saltoLinea STATEMENTS:s SIFSTATEMENT:s2 END IF{::}
+IFSTATEMENT      ::= IF CONDICION:c THEN M:m saltoLinea STATEMENTS:s N:n M:m2 SIFSTATEMENT:s2 END IF{:   
+                        ArrayList<Integer> siguiente = new ArrayList<>();                     
+                        cuadruplos.completa(c.getListaVerdadera(), m.getNum());
+                        if (s2 != null){
+                            cuadruplos.completa(c.getListaFalsa(),m2.getNum());
+                            siguiente = fusiona(n,fusiona(s,s2));
+                        } else {
+                            cuadruplos.eliminarUltimo();
+                            siguiente = fusiona(c.getListaFalsa(),s);
+                        }
+                        RESULT = siguiente;
+                    :}
 ;        
 
-SIFSTATEMENT ::= ELSEIF CONDICION:c THEN saltoLinea STATEMENTS:s SIFSTATEMENT:s2  {::}
-                |  ELSE saltoLinea STATEMENTS:s {::} 
-                | {::}
+SIFSTATEMENT ::= ELSEIF CONDICION:c THEN M:m saltoLinea STATEMENTS:s N:n M:m2 SIFSTATEMENT:s2  {:
+                    ArrayList<Integer> siguiente = new ArrayList<>();                     
+                    cuadruplos.completa(c.getListaVerdadera(), m.getNum());                    
+                    if (s2 != null){                        
+                        cuadruplos.completa(c.getListaFalsa(),m2.getNum());
+                        siguiente = fusiona(n,fusiona(s,s2));
+                    } else {
+                        cuadruplos.eliminarUltimo();
+                        siguiente = fusiona(c.getListaFalsa(),s);
+                    }
+                    RESULT = siguiente;
+                :}
+                |  ELSE saltoLinea STATEMENTS:s {:
+                    RESULT = s;
+                :} 
+                | {: RESULT = null; :}
 ;
 
 
@@ -290,40 +325,53 @@ VARCALL     ::= VALOR:val COMA VARCALL:v {:
 ;
 
 //gramática condiciones
-CONDICION   ::= CONDICION:c AND CONDICIONP:c1 {:
-                    //cuadruplo
+CONDICION   ::= CONDICIONP:c AND M:m CONDICION:c1  {:
+                    cuadruplos.completa(c.getListaVerdadera(),m.getNum());
+                    ArrayList<Integer> listaFalsa = fusiona(c.getListaFalsa(),c1.getListaFalsa());                    
+                    RESULT = new Condiciones(c1.getListaVerdadera(),listaFalsa);
                 :}
-                | CONDICION:c OR CONDICIONP:c1 {:
-                    //cuadruplo
+                | CONDICIONP:c OR M:m CONDICION:c1 {:                    
+                    cuadruplos.completa(c.getListaFalsa(),m.getNum());
+                    ArrayList<Integer> listaVerdadera = fusiona(c.getListaVerdadera(),c1.getListaVerdadera());
+                    RESULT = new Condiciones(listaVerdadera,c1.getListaFalsa());
                 :}
                 | NOT CONDICIONP:c {:
-                    //cuadruplo
+                    RESULT = new Condiciones(c.getListaFalsa(),c.getListaVerdadera());
                 :}
                 | CONDICIONP:c {:
-                    //cuadruplo
+                    RESULT = c;
                 :}
 ;
 
 CONDICIONP  ::= VALOR:v OPCONDICION:o VALOR:v2 {:
+                    Condiciones e;
                     if (o.equals("=")){
                         if ( v.getTipo().equals(v2.getTipo()) ){
                             //cuadruplos
-
+                            e = new Condiciones(creaLista(cuadruplos.siguienteCuad()), creaLista(cuadruplos.siguienteCuad() + 1));
+                            cuadruplos.addCuadruplo("IF=",v.getValor(),v2.getValor(),"");
+                            cuadruplos.addCuadruplo("GOTO","");
                         } else {
+                            e = null;
                             errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " " + v.getTipo() + " no es del mismo tipo que " + v2.getTipo());
                         }
                     } else {
                         if (v.getTipo().equals("INTEGER") && v2.getTipo().equals("INTEGER")){
                             //cuadruplos
+                            e = new Condiciones(creaLista(cuadruplos.siguienteCuad()), creaLista(cuadruplos.siguienteCuad() + 1));
+                            cuadruplos.addCuadruplo("IF"+o,v.getValor(),v2.getValor(),"");
+                            cuadruplos.addCuadruplo("GOTO","");
                         } else {
+                            e = null;
                             if (!v.getTipo().equals("INTEGER")){
-                            errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " " + v.getTipo() + " no es INTEGER");
+                                errores.add("Error: Linea: "+ (vleft + 1) + " Columna: " + (vright + 1) + " " + v.getTipo() + " no es INTEGER");
                             }
                             if (!v2.getTipo().equals("INTEGER")){
                                 errores.add("Error: Linea: "+ (v2left + 1) + " Columna: " + (v2right + 1) + " " + v.getTipo() + " no es INTEGER");
                             }
                         }                        
                     }
+                    RESULT = e;
                 :}
 ;
 
@@ -644,4 +692,10 @@ VALWR       ::= identificador:id {:
                 | UNIRSTRNG:ustr {: RESULT = ustr; :}
 ; 
 
-M           ::= {: :};
+M           ::= {: RESULT = new Marcador(cuadruplos.siguienteCuad(),0); :}
+;
+
+N           ::= {:  ArrayList<Integer> retVal = creaLista(cuadruplos.siguienteCuad());  
+                    cuadruplos.addCuadruplo("GOTO","");
+                    RESULT = retVal; 
+                :};

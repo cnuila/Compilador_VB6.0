@@ -135,7 +135,10 @@ public class Main extends javax.swing.JFrame {
                 parser2 p2 = new parser2(new Lexer(new FileReader(archivoActual)));
                 p2.setErrores(miParser.errores);
                 p2.setTablaSimbolos(miParser.tablaSimbolos);
-                p2.parse(); 
+                p2.parse();
+                for (String error: p2.errores){
+                    log += error + "\n";
+                }
             } else {
                 if (!miParser.errores.isEmpty()) {
                     for (int i = 0; i < miParser.errores.size(); i++) {

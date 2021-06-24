@@ -96,17 +96,19 @@ MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:
 ;
 
 //Intrucciones de una Structure
-STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea STRUCTINSTRUC:s END STRUCTURE {:
+STRUCTUREDECLA   ::= STRUCTURE identificador:id M:m saltoLinea STRUCTINSTRUC:s END STRUCTURE {:
                             Nodo node = new Nodo("STRUCTURE",parser.cont);
                             parser.cont++;
                             node.addHijo(new Nodo(id,parser.cont));
                             parser.cont++; 
-                            node.addHijo(s);                            
+                            node.addHijo(s);  
+                            tablaSimbolos.agregarAmbito(id+".", cantVarsCreadas - m.getNum());
+
                             RESULT = node;
                 :}
-                     | STRUCTURE error saltoLinea STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un identificador para la structure"); :}
-                     | STRUCTURE identificador error STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un salto de linea"); :}
-                     | STRUCTURE identificador saltoLinea STRUCTINSTRUC END error {: errores.add("Se esperaba un identificador para la structure"); :}
+                     | STRUCTURE error M:m saltoLinea STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un identificador para la structure"); :}
+                     | STRUCTURE identificador M:m error STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un salto de linea"); :}
+                     | STRUCTURE identificador M:m saltoLinea STRUCTINSTRUC END error {: errores.add("Se esperaba un identificador para la structure"); :}
 ;
 
 STRUCTINSTRUC   ::= DECLARACION:d STRUCTINSTRUC:s {:

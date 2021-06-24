@@ -132,6 +132,7 @@ public class Main extends javax.swing.JFrame {
                 log += "No se encontraron errores\n\nSe genero el AST\n";
                 jtext_log.setText("");
                 jtext_log.setText(log);
+                System.out.println("hola");
                 parser2 p2 = new parser2(new Lexer(new FileReader(archivoActual)));
                 p2.setErrores(miParser.errores);
                 p2.setTablaSimbolos(miParser.tablaSimbolos);

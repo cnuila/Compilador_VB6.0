@@ -20,17 +20,10 @@ parser code
 :}
 
 terminal IF, ELSE, END, THEN, ELSEIF, IGUAL, STRUCTURE, saltoLinea, DIM, COMA, AS, BOOLEANTYPE, TRUE, FALSE, INTEGERTYPE, STRINGTYPE, AND, OR, NOT, NEW, MODULE, SUB, PARENTESISL, PARENTESISR, EXIT, FOR, TO, NEXT, WHILE, DO, LOOP, RETURN, CONCATSTRING, FUNCTION, READ, WRITE;
-<<<<<<< HEAD
-terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL, LLAMADOSTRUC;
-
-nonterminal S;
-nonterminal Nodo STATEMENTS,MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, VARS, DECLARACION, T, PARAMCALL, VARCALL, OPASIGN, ASIGN, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, FORSTATEMENT, DOWHILESTATE, COUNTER;
-=======
 terminal String identificador, STRING, INTEGER, OPADICION, OPMULTI, OPREL,PUNTO;
 
 nonterminal S;
 nonterminal Nodo STATEMENTS,MDLINSTRUC, SUBPROCE, FUNC, WRCONSOLE, STRUCTINSTRUC, UNIRSTRNG, VALWR, OPARIT, VARS, DECLARACION, T, PARAMCALL, VARCALL, OPASIGN, ASIGN, CONDICION, CONDICIONP, RETVAL, SIFSTATEMENT, IFSTATEMENT, SUBINSTRUC, FUNCINSTRUC,STRUCTUREDECLA, FORSTATEMENT, DOWHILESTATE, COUNTER,LLAMADOSTRUC;
->>>>>>> cf38d4c9e6bbb76dc09f2e18ed922e9acb52d215
 nonterminal String VALUNIRSTR, TIPO, OPCONDICION;
 nonterminal Objeto CANTVARS, CANTVARS2, VARPARAMS, PARAMS, VARS2, VALOR, CALL;
 nonterminal Marcador M;
@@ -103,36 +96,38 @@ MDLINSTRUC  ::= DECLARACION:d MDLINSTRUC:md {:
 ;
 
 //Intrucciones de una Structure
-STRUCTUREDECLA   ::= STRUCTURE identificador:id saltoLinea STRUCTINSTRUC:s END STRUCTURE {:
+STRUCTUREDECLA   ::= STRUCTURE identificador:id M:m saltoLinea STRUCTINSTRUC:s END STRUCTURE {:
                             Nodo node = new Nodo("STRUCTURE",parser.cont);
                             parser.cont++;
                             node.addHijo(new Nodo(id,parser.cont));
                             parser.cont++; 
-                            node.addHijo(s);                            
+                            node.addHijo(s);  
+                            tablaSimbolos.agregarAmbito(id+".", cantVarsCreadas - m.getNum());
+
                             RESULT = node;
                 :}
-                     | STRUCTURE error saltoLinea STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un identificador para la structure"); :}
-                     | STRUCTURE identificador error STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un salto de linea"); :}
-<<<<<<< HEAD
-                     | STRUCTURE identificador saltoLinea DECLARACION END error {: errores.add("Se esperaba un identificador para la structure"); :}
-=======
-                     | STRUCTURE identificador saltoLinea STRUCTINSTRUC END error {: errores.add("Se esperaba un identificador para la structure"); :}
->>>>>>> cf38d4c9e6bbb76dc09f2e18ed922e9acb52d215
+                     | STRUCTURE error M:m saltoLinea STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un identificador para la structure"); :}
+                     | STRUCTURE identificador M:m error STRUCTINSTRUC END STRUCTURE {: errores.add("Se esperaba un salto de linea"); :}
+                     | STRUCTURE identificador M:m saltoLinea STRUCTINSTRUC END error {: errores.add("Se esperaba un identificador para la structure"); :}
 ;
 
 STRUCTINSTRUC   ::= DECLARACION:d STRUCTINSTRUC:s {:
-                        Nodo node = new Nodo("STRUCTURE INSTRUCTIONS",parser.cont);
+                        Nodo node = new Nodo("STATEMENTS",parser.cont);
                         parser.cont++;
                         node.addHijo(d);
-                        node.addHijo(s);                            
+                        if (s != null){
+                        node.addHijo(s);   
+                        }                    
                         RESULT = node;
                     :} 
                     | saltoLinea STRUCTINSTRUC:s {:
-                        RESULT=s;
-                    :} 
-                    | saltoLinea {:
+                        if (s != null){
+                            RESULT = s;   
+                        }
+                    :}
+                    |   {:
                         Nodo node = new Nodo("VACIO",parser.cont);
-                        parser.cont++;                            
+                        parser.cont++;                                   
                         RESULT = node;
                     :}
 ;
@@ -485,13 +480,18 @@ SIFSTATEMENT ::= ELSEIF CONDICION:c THEN saltoLinea STATEMENTS:s SIFSTATEMENT:s2
                 | ELSE error STATEMENTS {: errores.add("Se esperaba un salto de línea"); :}
 ;
 
-DOWHILESTATE  ::= DO WHILE CONDICION:c saltoLinea STATEMENTS:s LOOP{:
+DOWHILESTATE  ::= DO WHILE CONDICION:c M:m saltoLinea STATEMENTS:s LOOP{:
                             Nodo node = new Nodo("DO WHILE",parser.cont);
                             parser.cont++;
                             node.addHijo(c);
                             if (s != null){
                                 node.addHijo(s);
                             }
+
+                            int cantVars = cantVarsCreadas - m.getNum();
+                            tablaSimbolos.agregarAmbito("DOWHILE.", cantVars);
+                            offset -= tablaSimbolos.disminuirOffset(cantVars);
+
                             RESULT = node;
                 :}
                 | error WHILE CONDICION M saltoLinea STATEMENTS LOOP {: errores.add("Se esperaba un DO"); :}
@@ -500,7 +500,7 @@ DOWHILESTATE  ::= DO WHILE CONDICION:c saltoLinea STATEMENTS:s LOOP{:
                 | DO WHILE CONDICION M error STATEMENTS LOOP {: errores.add("Se esperaba un salto de linea"); :}           
 ;
 
-FORSTATEMENT  ::= FOR COUNTER:c TO VALOR:v saltoLinea STATEMENTS:s NEXT{:
+FORSTATEMENT  ::= FOR COUNTER:c TO VALOR:v M:m saltoLinea STATEMENTS:s NEXT{:
                             Nodo node = new Nodo("FOR",parser.cont);
                             parser.cont++;
                             node.addHijo(c);
@@ -508,6 +508,11 @@ FORSTATEMENT  ::= FOR COUNTER:c TO VALOR:v saltoLinea STATEMENTS:s NEXT{:
                             if (s != null){
                                 node.addHijo(s);
                             }
+
+                            int cantVars = cantVarsCreadas - m.getNum();
+                            tablaSimbolos.agregarAmbito("FOR.", cantVars);
+                            offset -= tablaSimbolos.disminuirOffset(cantVars);
+
                             RESULT = node;
                 :}
                 | error COUNTER TO VALOR M saltoLinea STATEMENTS NEXT {: errores.add("Se esperaba un FOR"); :}
@@ -622,6 +627,18 @@ OPCONDICION ::= OPREL:o {:
                 :} 
                 | IGUAL {: 
                     RESULT="=";
+                :}
+;
+
+LLAMADOSTRUC ::= identificador:id PUNTO identificador:id2 {:
+                    Nodo node = new Nodo("PUNTO",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo(id2,parser.cont));
+                    parser.cont++;
+
+                    RESULT = node;
                 :}
 ;
 

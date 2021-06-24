@@ -9,6 +9,10 @@ public class Cuadruplo {
         this.tablaCuadruplos = new ArrayList<>();
     }
 
+    public ArrayList<FilaCuadruplo> getListaCuadruplo(){
+        return tablaCuadruplos;
+    }
+
     public void addCuadruplo(String operacion, String arg1, String arg2, String destino) {
         tablaCuadruplos.add(new FilaCuadruplo(operacion, arg1, arg2, destino));
     }
@@ -19,6 +23,10 @@ public class Cuadruplo {
 
     public void addCuadruplo(String operacion, String arg1) {
         tablaCuadruplos.add(new FilaCuadruplo(operacion, arg1));
+    }
+
+    public void addCuadruplo(String operacion, String arg1, int lugar) {
+        tablaCuadruplos.add(lugar,new FilaCuadruplo(operacion, arg1));
     }
 
     public void imprimirCuadruplos() {

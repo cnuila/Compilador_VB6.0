@@ -21,7 +21,7 @@ public class Simbolo {
             sizeT = 4;
         }
         if (_tipo.equals("BOOLEAN")) {
-            sizeT = 1;
+            sizeT = 4;
         }
         this.size = sizeT;
         this.verficada = false;
@@ -80,6 +80,10 @@ public class Simbolo {
 
     public void setAmbitoPrefijo(String _ambito) {
         this.ambito = _ambito + this.ambito;
+    }
+
+    public String getAmbito() {
+        return this.ambito;
     }
 
     public void estaVerificada(boolean _verificada) {

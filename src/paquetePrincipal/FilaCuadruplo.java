@@ -35,6 +35,26 @@ public class FilaCuadruplo {
         return this.arg1;
     }
 
+    public String getArg2(){
+        return this.arg2;
+    }
+
+    public void setArg2(String _arg2){
+        this.arg2 = _arg2;
+    }
+
+    public String getOp(){
+        return this.operacion;
+    }
+
+    public void setOp(String _operacion){
+        this.operacion = _operacion;
+    }
+
+    public String getDestino(){
+        return this.destino;
+    }
+
     public void setDestino(String _destino){
         this.destino = _destino;
     }

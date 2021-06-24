@@ -3,7 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+<<<<<<< HEAD
             <file>file:/C:/Users/Danie/OneDrive/Escritorio/compipro/Compilador_VB6.0/src/paquetePrincipal/Main.java</file>
+=======
+            <file>file:/home/cnuila/Documents/Compiladores/Compilador_VB6.0/src/paquetePrincipal/parser.java</file>
+            <file>file:/home/cnuila/Documents/Compiladores/Compilador_VB6.0/src/paquetePrincipal/Main.java</file>
+>>>>>>> 2cba8ba39585db4651fb2df5c601fa4bad38f9b5
         </group>
     </open-files>
 </project-private>

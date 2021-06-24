@@ -121,7 +121,7 @@ public class Main extends javax.swing.JFrame {
     private void jb_analizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jb_analizarMouseClicked
         try {
             Lexer scanner = new Lexer(new FileReader(archivoActual));
-            parser miParser = new parser(scanner);
+            parser miParser = new parser(scanner);            
             miParser.parse();
             String log = "Inicia el analisis\n"
                     + "-------------------------------------------------------\n";

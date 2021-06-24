@@ -25,10 +25,6 @@ public class Nodo {
         this.idNodo = _idNodo;
     }
 
-    Nodo(Nodo l, int cont) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public void exportarArbol(String dotFormat, String fileName) {
         GraphViz gv = new GraphViz();
         gv.addln(gv.start_graph());
@@ -39,9 +35,9 @@ public class Nodo {
         gv.decreaseDpi();
         gv.decreaseDpi();
         // linux
-        //File out = new File("./" + fileName + gv.getImageDpi() + "." + type);
+        File out = new File("./" + fileName + gv.getImageDpi() + "." + type);
         // windows
-        File out = new File(fileName + "." + type);
+        // File out = new File(fileName + "." + type);
         gv.writeGraphToFile(gv.getGraph(gv.getDotSource(), type, repesentationType), out);
     }
 

@@ -500,7 +500,7 @@ DOWHILESTATE  ::= DO WHILE CONDICION:c M:m saltoLinea STATEMENTS:s LOOP{:
                 | DO WHILE CONDICION M error STATEMENTS LOOP {: errores.add("Se esperaba un salto de linea"); :}           
 ;
 
-FORSTATEMENT  ::= FOR COUNTER:c TO VALOR:v M:m saltoLinea STATEMENTS:s NEXT{:
+FORSTATEMENT  ::= FOR M:m COUNTER:c TO VALOR:v saltoLinea STATEMENTS:s NEXT{:
                             Nodo node = new Nodo("FOR",parser.cont);
                             parser.cont++;
                             node.addHijo(c);
@@ -515,10 +515,9 @@ FORSTATEMENT  ::= FOR COUNTER:c TO VALOR:v M:m saltoLinea STATEMENTS:s NEXT{:
 
                             RESULT = node;
                 :}
-                | error COUNTER TO VALOR M saltoLinea STATEMENTS NEXT {: errores.add("Se esperaba un FOR"); :}
-                | FOR error TO VALOR M saltoLinea STATEMENTS NEXT {: errores.add("Error en la asignacion del contador del for"); :}
-                | FOR COUNTER error VALOR M saltoLinea STATEMENTS NEXT {: errores.add("Se esperaba un TO"); :}
-                | FOR COUNTER TO VALOR M error STATEMENTS NEXT {: errores.add("Se esperaba un salto de linea"); :}
+                | FOR M error TO VALOR saltoLinea STATEMENTS NEXT {: errores.add("Error en la asignacion del contador del for"); :}
+                | FOR M COUNTER error VALOR saltoLinea STATEMENTS NEXT {: errores.add("Se esperaba un TO"); :}
+                | FOR M COUNTER TO VALOR error STATEMENTS NEXT {: errores.add("Se esperaba un salto de linea"); :}
 ;
 
 RETVAL      ::= RETURN VALOR:v {:
@@ -536,15 +535,20 @@ COUNTER     ::= identificador:id OPASIGN:o VALOR:v {:
                     o.addHijo(v.getNodo());
                     RESULT = o;
                 :} 
-                | identificador:id AS INTEGERTYPE IGUAL VALOR:v{:
-                            Nodo node = new Nodo("=",parser.cont);
-                            parser.cont++;
-                            node.addHijo(new Nodo(id,parser.cont));
-                            parser.cont++;
-                            node.addHijo(new Nodo("INTEGER",parser.cont));
-                            parser.cont++;
-                            node.addHijo(v.getNodo());
-                            RESULT = node;
+                | identificador:id AS TIPO:t IGUAL VALOR:v{:
+                    Nodo node = new Nodo("=",parser.cont);
+                    parser.cont++;
+                    node.addHijo(new Nodo(id,parser.cont));
+                    parser.cont++;
+                    node.addHijo(new Nodo(t,parser.cont));
+                    parser.cont++;
+                    node.addHijo(v.getNodo());
+
+                    tablaSimbolos.agregarID(id,t,offset,"");
+                    offset += tablaSimbolos.sizeUltimo();
+                    cantVarsCreadas += 1;
+
+                    RESULT = node;
                 :}
                 | error AS INTEGERTYPE IGUAL VALOR {: errores.add("Se esperaba un identificador"); :}
 ;

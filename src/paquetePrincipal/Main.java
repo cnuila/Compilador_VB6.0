@@ -117,7 +117,7 @@ public class Main extends javax.swing.JFrame {
             System.out.println(e);
         }
     }//GEN-LAST:event_jb_cargarArchivoMouseClicked
-
+ 
     private void jb_analizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jb_analizarMouseClicked
         try {
             Lexer scanner = new Lexer(new FileReader(archivoActual));

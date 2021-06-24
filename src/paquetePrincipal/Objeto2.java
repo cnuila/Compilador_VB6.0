@@ -1,3 +1,4 @@
+package paquetePrincipal;
 public class Objeto2 {
 
     private String tipo;

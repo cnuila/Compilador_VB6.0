@@ -121,7 +121,7 @@ public class Main extends javax.swing.JFrame {
     private void jb_analizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jb_analizarMouseClicked
         try {
             Lexer scanner = new Lexer(new FileReader(archivoActual));
-            parser miParser = new parser(scanner);
+            parser miParser = new parser(scanner);            
             miParser.parse();
             String log = "Inicia el analisis\n"
                     + "-------------------------------------------------------\n";
@@ -135,7 +135,10 @@ public class Main extends javax.swing.JFrame {
                 parser2 p2 = new parser2(new Lexer(new FileReader(archivoActual)));
                 p2.setErrores(miParser.errores);
                 p2.setTablaSimbolos(miParser.tablaSimbolos);
-                p2.parse(); 
+                p2.parse();
+                for (String error: p2.errores){
+                    log += error + "\n";
+                }
             } else {
                 if (!miParser.errores.isEmpty()) {
                     for (int i = 0; i < miParser.errores.size(); i++) {
